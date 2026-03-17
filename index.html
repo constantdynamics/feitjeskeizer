@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feitjeskeizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0d0221;
+      background-image:
+        linear-gradient(180deg, #0d0221 0%, #1a0533 50%, #0d0221 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    /* Retro grid floor */
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 40vh;
+      background-image:
+        linear-gradient(rgba(255,0,255,0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,0,255,0.3) 1px, transparent 1px);
+      background-size: 60px 60px;
+      transform: perspective(400px) rotateX(60deg);
+      transform-origin: bottom;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    h1 {
+      font-family: 'VT323', monospace;
+      font-size: 3.5rem;
+      color: #ff2d78;
+      text-shadow: 0 0 10px #ff2d78, 0 0 30px #ff2d78, 0 0 60px #ff2d78;
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      font-family: 'VT323', monospace;
+      color: #00f5ff;
+      font-size: 1.2rem;
+      letter-spacing: 3px;
+      margin-bottom: 40px;
+      text-shadow: 0 0 8px #00f5ff;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 45, 120, 0.5);
+      border-radius: 12px;
+      padding: 40px 36px;
+      max-width: 680px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(255, 45, 120, 0.2), inset 0 0 30px rgba(0, 245, 255, 0.05);
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(8px);
+    }
+
+    .fact-number {
+      font-family: 'VT323', monospace;
+      color: #bf00ff;
+      font-size: 1rem;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 6px #bf00ff;
+    }
+
+    .fact-text {
+      color: #e0d7ff;
+      font-size: 1.35rem;
+      line-height: 1.7;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 36px;
+      transition: opacity 0.3s;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    button {
+      font-family: 'VT323', monospace;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      padding: 12px 36px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-like {
+      background: linear-gradient(135deg, #bf00ff, #ff2d78);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(191, 0, 255, 0.6);
+    }
+    .btn-like:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 28px rgba(191, 0, 255, 0.9);
+    }
+
+    .btn-dislike {
+      background: linear-gradient(135deg, #1a0533, #2a0a4a);
+      color: #00f5ff;
+      border: 1px solid #00f5ff;
+      box-shadow: 0 0 12px rgba(0, 245, 255, 0.3);
+    }
+    .btn-dislike:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 24px rgba(0, 245, 255, 0.6);
+    }
+
+    .progress {
+      margin-top: 24px;
+      font-family: 'VT323', monospace;
+      color: #bf00ff;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-shadow: 0 0 6px #bf00ff;
+    }
+
+    /* Log sectie */
+    .log-section {
+      max-width: 680px;
+      width: 100%;
+      margin-top: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .log-section h2 {
+      font-family: 'VT323', monospace;
+      color: #00f5ff;
+      font-size: 1.8rem;
+      letter-spacing: 3px;
+      text-shadow: 0 0 8px #00f5ff;
+      margin-bottom: 12px;
+    }
+
+    .log-box {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'VT323', monospace;
+      font-size: 1rem;
+      color: #a0f0ff;
+      white-space: pre-wrap;
+      max-height: 280px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .log-empty {
+      color: #555;
+      font-style: italic;
+    }
+
+    .btn-copy {
+      margin-top: 12px;
+      background: transparent;
+      border: 1px solid #ff2d78;
+      color: #ff2d78;
+      font-size: 1.1rem;
+      padding: 8px 24px;
+      box-shadow: 0 0 10px rgba(255, 45, 120, 0.3);
+      letter-spacing: 2px;
+    }
+    .btn-copy:hover {
+      background: rgba(255, 45, 120, 0.1);
+      box-shadow: 0 0 20px rgba(255, 45, 120, 0.6);
+    }
+
+    .done-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .done-screen h2 {
+      font-family: 'VT323', monospace;
+      font-size: 2.5rem;
+      color: #ff2d78;
+      text-shadow: 0 0 16px #ff2d78;
+      letter-spacing: 3px;
+    }
+    .done-screen p {
+      color: #e0d7ff;
+      font-size: 1.1rem;
+    }
+    .btn-restart {
+      background: linear-gradient(135deg, #00f5ff, #bf00ff);
+      color: #0d0221;
+      font-size: 1.4rem;
+      padding: 12px 32px;
+      letter-spacing: 2px;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+    }
+    .btn-restart:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 32px rgba(0, 245, 255, 0.8);
+    }
+
+    .fade-out { opacity: 0; }
+  </style>
+</head>
+<body>
+
+  <h1>✦ FEITJESKEIZER ✦</h1>
+  <p class="subtitle">SWIPE DOOR DE KENNIS</p>
+
+  <div class="card" id="card">
+    <div class="fact-number" id="fact-number">FEIT #1</div>
+    <div class="fact-text" id="fact-text"></div>
+    <div class="buttons">
+      <button class="btn-dislike" onclick="react('dislike')">✕ SKIP</button>
+      <button class="btn-like" onclick="react('like')">♥ THNKS</button>
+    </div>
+    <div class="progress" id="progress"></div>
+
+    <div class="done-screen" id="done-screen">
+      <h2>✦ KLAAR ✦</h2>
+      <p>Je hebt alle feitjes gezien! Kopieer de log hieronder en geef die aan AI voor een nieuwe selectie.</p>
+      <button class="btn-restart" onclick="restart()">↺ OPNIEUW</button>
+    </div>
+  </div>
+
+  <div class="log-section">
+    <h2>// LOG</h2>
+    <div class="log-box" id="log-box"><span class="log-empty">Nog geen reacties...</span></div>
+    <button class="btn-copy" onclick="copyLog()">⎘ KOPIEER LOG</button>
+  </div>
+
+  <script>
+    const feiten = [
+      "Een octopus heeft drie harten, blauw bloed en negen hersenen.",
+      "Cleopatra leefde dichter bij de uitvinding van de iPhone dan bij de bouw van de piramides.",
+      "Oxford University is ouder dan de Azteken.",
+      "Mammoeten liepen nog rond toen de piramides al gebouwd waren.",
+      "Een groep flamingo's heet een 'flamboyance.'",
+      "Honing bederft nooit — in farao's graven gevonden honing was nog eetbaar.",
+      "Een dag op Venus is langer dan een jaar op Venus.",
+      "Haaien zijn ouder dan bomen.",
+      "Nintendo bestond al als speelkaartenmaker in 1889.",
+      "Schildpadden ademen door hun achterste.",
+    ];
+
+    let volgorde = [];
+    let huidigIndex = 0;
+    let log = [];
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function start() {
+      volgorde = shuffle(feiten.map((_, i) => i));
+      huidigIndex = 0;
+      toonFeit();
+    }
+
+    function toonFeit() {
+      const card = document.getElementById('card');
+      const doneScreen = document.getElementById('done-screen');
+      const factText = document.getElementById('fact-text');
+      const factNumber = document.getElementById('fact-number');
+      const progress = document.getElementById('progress');
+      const buttons = card.querySelector('.buttons');
+
+      if (huidigIndex >= volgorde.length) {
+        // Klaar
+        factText.style.display = 'none';
+        factNumber.style.display = 'none';
+        progress.style.display = 'none';
+        buttons.style.display = 'none';
+        doneScreen.style.display = 'flex';
+        return;
+      }
+
+      const feitIdx = volgorde[huidigIndex];
+      factText.classList.add('fade-out');
+      setTimeout(() => {
+        factText.textContent = feiten[feitIdx];
+        factNumber.textContent = `FEIT #${feitIdx + 1}`;
+        progress.textContent = `${huidigIndex + 1} / ${volgorde.length}`;
+        factText.classList.remove('fade-out');
+      }, 300);
+    }
+
+    function react(reactie) {
+      const feitIdx = volgorde[huidigIndex];
+      const feit = feiten[feitIdx];
+      log.push({ feit, reactie });
+      updateLog();
+      huidigIndex++;
+      toonFeit();
+    }
+
+    function updateLog() {
+      const box = document.getElementById('log-box');
+      if (log.length === 0) {
+        box.innerHTML = '<span class="log-empty">Nog geen reacties...</span>';
+        return;
+      }
+      box.textContent = log.map(e =>
+        `[${e.reactie === 'like' ? '♥ LIKE   ' : '✕ SKIP   '}] ${e.feit}`
+      ).join('\n');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function copyLog() {
+      if (log.length === 0) return;
+      const tekst =
+        "=== FEITJESKEIZER LOG ===\n\n" +
+        "GELIKED:\n" +
+        log.filter(e => e.reactie === 'like').map(e => `- ${e.feit}`).join('\n') +
+        "\n\nGESKIPT:\n" +
+        log.filter(e => e.reactie === 'dislike').map(e => `- ${e.feit}`).join('\n') +
+        "\n\n=== Maak een nieuwe set feitjes die aansluit op mijn voorkeuren ===";
+      navigator.clipboard.writeText(tekst).then(() => {
+        const btn = document.querySelector('.btn-copy');
+        const orig = btn.textContent;
+        btn.textContent = '✓ GEKOPIEERD!';
+        setTimeout(() => btn.textContent = orig, 2000);
+      });
+    }
+
+    function restart() {
+      log = [];
+      updateLog();
+      const card = document.getElementById('card');
+      card.querySelector('.fact-text').style.display = '';
+      card.querySelector('.fact-number').style.display = '';
+      card.querySelector('#progress').style.display = '';
+      card.querySelector('.buttons').style.display = '';
+      document.getElementById('done-screen').style.display = 'none';
+      start();
+    }
+
+    start();
+  </script>
+</body>
+</html>
