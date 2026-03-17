@@ -226,6 +226,14 @@
     }
 
     .fade-out { opacity: 0; }
+
+    .hint {
+      margin-top: 16px;
+      font-family: 'VT323', monospace;
+      font-size: 0.85rem;
+      color: rgba(191, 0, 255, 0.45);
+      letter-spacing: 2px;
+    }
   </style>
 </head>
 <body>
@@ -241,6 +249,7 @@
       <button class="btn-like" onclick="react('like')">♥ THNKS</button>
     </div>
     <div class="progress" id="progress"></div>
+    <div class="hint">← SKIP &nbsp;|&nbsp; LIKE →</div>
 
     <div class="done-screen" id="done-screen">
       <h2>✦ KLAAR ✦</h2>
@@ -317,6 +326,7 @@
     }
 
     function react(reactie) {
+      if (huidigIndex >= volgorde.length) return;
       const feitIdx = volgorde[huidigIndex];
       const feit = feiten[feitIdx];
       log.push({ feit, reactie });
@@ -324,6 +334,20 @@
       huidigIndex++;
       toonFeit();
     }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'l') react('like');
+      if (e.key === 'ArrowLeft' || e.key === 's') react('dislike');
+    });
+
+    // Touch swipe
+    let touchStartX = 0;
+    document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 60) react(dx > 0 ? 'like' : 'dislike');
+    }, { passive: true });
 
     function updateLog() {
       const box = document.getElementById('log-box');
