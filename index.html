@@ -4,264 +4,442 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Feitjeskeizer</title>
-  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #ff2d78;
+      --cyan: #00f5ff;
+      --purple: #bf00ff;
+      --bg: #0d0221;
+    }
 
     body {
       min-height: 100vh;
-      background: #0d0221;
-      background-image:
-        linear-gradient(180deg, #0d0221 0%, #1a0533 50%, #0d0221 100%);
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% 0%, #1e0545 0%, var(--bg) 70%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       font-family: 'Rajdhani', sans-serif;
       overflow-x: hidden;
-      padding: 20px;
+      padding: 24px 16px 60px;
     }
 
-    /* Retro grid floor */
+    /* Animated grid floor */
     body::after {
       content: '';
       position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 40vh;
+      bottom: 0; left: -20%; right: -20%;
+      height: 45vh;
       background-image:
-        linear-gradient(rgba(255,0,255,0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,0,255,0.3) 1px, transparent 1px);
-      background-size: 60px 60px;
-      transform: perspective(400px) rotateX(60deg);
+        linear-gradient(rgba(255,0,255,0.25) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,0,255,0.25) 1px, transparent 1px);
+      background-size: 50px 50px;
+      transform: perspective(500px) rotateX(65deg);
       transform-origin: bottom;
       pointer-events: none;
       z-index: 0;
+      animation: gridScroll 8s linear infinite;
+    }
+    @keyframes gridScroll {
+      from { background-position: 0 0; }
+      to   { background-position: 0 50px; }
     }
 
+    /* ── Header ── */
+    .header {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin-bottom: 28px;
+    }
     h1 {
       font-family: 'VT323', monospace;
-      font-size: 3.5rem;
-      color: #ff2d78;
-      text-shadow: 0 0 10px #ff2d78, 0 0 30px #ff2d78, 0 0 60px #ff2d78;
-      letter-spacing: 4px;
-      margin-bottom: 8px;
-      text-align: center;
-      position: relative;
-      z-index: 1;
+      font-size: clamp(2.8rem, 8vw, 4.2rem);
+      color: var(--pink);
+      text-shadow: 0 0 8px var(--pink), 0 0 24px var(--pink), 0 0 60px var(--pink);
+      letter-spacing: 5px;
+      line-height: 1;
+      animation: flicker 6s infinite;
     }
-
+    @keyframes flicker {
+      0%,95%,100% { opacity: 1; }
+      96% { opacity: 0.85; }
+      97% { opacity: 1; }
+      98% { opacity: 0.7; }
+      99% { opacity: 1; }
+    }
     .subtitle {
       font-family: 'VT323', monospace;
-      color: #00f5ff;
-      font-size: 1.2rem;
-      letter-spacing: 3px;
-      margin-bottom: 40px;
-      text-shadow: 0 0 8px #00f5ff;
-      position: relative;
-      z-index: 1;
+      color: var(--cyan);
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+      margin-top: 4px;
+      text-shadow: 0 0 8px var(--cyan);
     }
+
+    /* ── Counters bar ── */
+    .counters {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 2;
+    }
+    .counter {
+      font-family: 'VT323', monospace;
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      padding: 4px 16px;
+      border-radius: 4px;
+      transition: transform 0.15s;
+    }
+    .counter.likes { color: var(--purple); border: 1px solid rgba(191,0,255,0.4); text-shadow: 0 0 6px var(--purple); }
+    .counter.skips { color: var(--cyan);   border: 1px solid rgba(0,245,255,0.3); text-shadow: 0 0 6px var(--cyan); }
+    .counter.bump  { transform: scale(1.25); }
+
+    /* ── Progress bar ── */
+    .progress-bar-wrap {
+      max-width: 560px;
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), var(--pink), var(--cyan));
+      border-radius: 2px;
+      transition: width 0.4s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 0 8px var(--pink);
+    }
+
+    /* ── Card stack ── */
+    .card-wrap {
+      position: relative;
+      max-width: 560px;
+      width: 100%;
+      z-index: 2;
+      margin-bottom: 24px;
+    }
+    /* Ghost cards behind */
+    .card-wrap::before,
+    .card-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,45,120,0.2);
+    }
+    .card-wrap::before { transform: rotate(-2deg) translateY(6px); z-index: -2; }
+    .card-wrap::after  { transform: rotate(1.5deg) translateY(3px); z-index: -1; }
 
     .card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 45, 120, 0.5);
-      border-radius: 12px;
-      padding: 40px 36px;
-      max-width: 680px;
+      background: rgba(13, 2, 33, 0.75);
+      border: 1px solid rgba(255,45,120,0.55);
+      border-radius: 16px;
+      padding: 36px 32px 28px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 0 30px rgba(255, 45, 120, 0.2), inset 0 0 30px rgba(0, 245, 255, 0.05);
-      position: relative;
-      z-index: 1;
-      backdrop-filter: blur(8px);
+      box-shadow:
+        0 0 40px rgba(255,45,120,0.15),
+        0 8px 32px rgba(0,0,0,0.5),
+        inset 0 0 40px rgba(0,245,255,0.04);
+      backdrop-filter: blur(12px);
+      transition: transform 0.12s ease, box-shadow 0.2s ease;
+      will-change: transform;
+      overflow: hidden;
     }
-
-    .fact-number {
-      font-family: 'VT323', monospace;
-      color: #bf00ff;
-      font-size: 1rem;
-      letter-spacing: 3px;
-      margin-bottom: 20px;
-      text-shadow: 0 0 6px #bf00ff;
+    /* CRT scanlines */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 10;
+      border-radius: inherit;
     }
-
-    .fact-text {
-      color: #e0d7ff;
-      font-size: 1.35rem;
-      line-height: 1.7;
-      min-height: 100px;
+    /* Swipe hint overlay */
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none;
+      z-index: 5;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 36px;
-      transition: opacity 0.3s;
+      font-family: 'VT323', monospace;
+      font-size: 3rem;
+      letter-spacing: 4px;
+    }
+    .card-overlay.like-flash  { background: rgba(191,0,255,0.12); color: var(--purple); border: 2px solid var(--purple); }
+    .card-overlay.skip-flash  { background: rgba(0,245,255,0.08); color: var(--cyan);   border: 2px solid var(--cyan); }
+    .card-overlay.show        { opacity: 1; }
+
+    /* Card fly-out animations */
+    @keyframes flyRight {
+      to { transform: translateX(120%) rotate(18deg); opacity: 0; }
+    }
+    @keyframes flyLeft {
+      to { transform: translateX(-120%) rotate(-18deg); opacity: 0; }
+    }
+    .card.fly-right { animation: flyRight 0.38s cubic-bezier(.4,0,1,1) forwards; }
+    .card.fly-left  { animation: flyLeft  0.38s cubic-bezier(.4,0,1,1) forwards; }
+
+    /* Card enter animation */
+    @keyframes cardIn {
+      from { transform: scale(0.88) translateY(24px); opacity: 0; }
+      to   { transform: scale(1)    translateY(0);    opacity: 1; }
+    }
+    .card.card-in { animation: cardIn 0.32s cubic-bezier(.2,.8,.4,1) forwards; }
+
+    .fact-number {
+      font-family: 'VT323', monospace;
+      color: var(--purple);
+      font-size: 0.9rem;
+      letter-spacing: 4px;
+      margin-bottom: 18px;
+      text-shadow: 0 0 6px var(--purple);
+      opacity: 0.8;
     }
 
+    .fact-text {
+      color: #ede8ff;
+      font-size: clamp(1.15rem, 3vw, 1.4rem);
+      font-weight: 600;
+      line-height: 1.75;
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Buttons ── */
     .buttons {
       display: flex;
-      gap: 20px;
+      gap: 16px;
       justify-content: center;
     }
 
     button {
       font-family: 'VT323', monospace;
-      font-size: 1.6rem;
       letter-spacing: 2px;
-      padding: 12px 36px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: transform 0.15s, box-shadow 0.15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
+    button:active { transform: scale(0.94) !important; }
 
     .btn-like {
-      background: linear-gradient(135deg, #bf00ff, #ff2d78);
+      background: linear-gradient(135deg, #8b00e8, var(--pink));
       color: #fff;
-      box-shadow: 0 0 16px rgba(191, 0, 255, 0.6);
+      font-size: 1.55rem;
+      padding: 11px 40px;
+      box-shadow: 0 0 20px rgba(191,0,255,0.5), 0 4px 12px rgba(0,0,0,0.3);
     }
     .btn-like:hover {
-      transform: scale(1.07);
-      box-shadow: 0 0 28px rgba(191, 0, 255, 0.9);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 0 36px rgba(191,0,255,0.85), 0 6px 20px rgba(0,0,0,0.3);
     }
 
     .btn-dislike {
-      background: linear-gradient(135deg, #1a0533, #2a0a4a);
-      color: #00f5ff;
-      border: 1px solid #00f5ff;
-      box-shadow: 0 0 12px rgba(0, 245, 255, 0.3);
+      background: rgba(255,255,255,0.04);
+      color: var(--cyan);
+      font-size: 1.55rem;
+      padding: 11px 40px;
+      border: 1px solid rgba(0,245,255,0.5);
+      box-shadow: 0 0 14px rgba(0,245,255,0.2), 0 4px 12px rgba(0,0,0,0.2);
     }
     .btn-dislike:hover {
-      transform: scale(1.07);
-      box-shadow: 0 0 24px rgba(0, 245, 255, 0.6);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 0 28px rgba(0,245,255,0.5), 0 6px 20px rgba(0,0,0,0.2);
     }
 
-    .progress {
-      margin-top: 24px;
+    .hint {
+      margin-top: 14px;
       font-family: 'VT323', monospace;
-      color: #bf00ff;
-      font-size: 1rem;
-      letter-spacing: 2px;
-      text-shadow: 0 0 6px #bf00ff;
-    }
-
-    /* Log sectie */
-    .log-section {
-      max-width: 680px;
-      width: 100%;
-      margin-top: 40px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .log-section h2 {
-      font-family: 'VT323', monospace;
-      color: #00f5ff;
-      font-size: 1.8rem;
-      letter-spacing: 3px;
-      text-shadow: 0 0 8px #00f5ff;
-      margin-bottom: 12px;
-    }
-
-    .log-box {
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(0, 245, 255, 0.3);
-      border-radius: 8px;
-      padding: 16px;
-      font-family: 'VT323', monospace;
-      font-size: 1rem;
-      color: #a0f0ff;
-      white-space: pre-wrap;
-      max-height: 280px;
-      overflow-y: auto;
-      line-height: 1.6;
-    }
-
-    .log-empty {
-      color: #555;
-      font-style: italic;
-    }
-
-    .btn-copy {
-      margin-top: 12px;
-      background: transparent;
-      border: 1px solid #ff2d78;
-      color: #ff2d78;
-      font-size: 1.1rem;
-      padding: 8px 24px;
-      box-shadow: 0 0 10px rgba(255, 45, 120, 0.3);
+      font-size: 0.82rem;
+      color: rgba(191,0,255,0.35);
       letter-spacing: 2px;
     }
-    .btn-copy:hover {
-      background: rgba(255, 45, 120, 0.1);
-      box-shadow: 0 0 20px rgba(255, 45, 120, 0.6);
-    }
 
+    /* ── Done screen ── */
     .done-screen {
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
+      padding: 8px 0 4px;
     }
     .done-screen h2 {
       font-family: 'VT323', monospace;
-      font-size: 2.5rem;
-      color: #ff2d78;
-      text-shadow: 0 0 16px #ff2d78;
-      letter-spacing: 3px;
+      font-size: 2.8rem;
+      color: var(--pink);
+      text-shadow: 0 0 16px var(--pink);
+      letter-spacing: 4px;
     }
-    .done-screen p {
-      color: #e0d7ff;
-      font-size: 1.1rem;
+    .done-stats {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .done-stat {
+      font-family: 'VT323', monospace;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      padding: 8px 22px;
+      border-radius: 6px;
+    }
+    .done-stat.liked  { color: var(--purple); border: 1px solid rgba(191,0,255,0.5); text-shadow: 0 0 8px var(--purple); }
+    .done-stat.skipped { color: var(--cyan); border: 1px solid rgba(0,245,255,0.4); text-shadow: 0 0 8px var(--cyan); }
+    .done-screen > p {
+      color: rgba(224,215,255,0.7);
+      font-size: 1rem;
+      max-width: 360px;
+      line-height: 1.5;
+      text-align: center;
     }
     .btn-restart {
-      background: linear-gradient(135deg, #00f5ff, #bf00ff);
-      color: #0d0221;
-      font-size: 1.4rem;
-      padding: 12px 32px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: var(--bg);
+      font-size: 1.45rem;
+      padding: 11px 34px;
       letter-spacing: 2px;
-      box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+      box-shadow: 0 0 22px rgba(0,245,255,0.4), 0 4px 12px rgba(0,0,0,0.3);
+      font-weight: 700;
     }
     .btn-restart:hover {
-      transform: scale(1.06);
-      box-shadow: 0 0 32px rgba(0, 245, 255, 0.8);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 0 36px rgba(0,245,255,0.7), 0 6px 20px rgba(0,0,0,0.3);
     }
 
-    .fade-out { opacity: 0; }
-
-    .hint {
-      margin-top: 16px;
+    /* ── Log section ── */
+    .log-section {
+      max-width: 560px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .log-section h2 {
       font-family: 'VT323', monospace;
-      font-size: 0.85rem;
-      color: rgba(191, 0, 255, 0.45);
+      color: var(--cyan);
+      font-size: 1.6rem;
+      letter-spacing: 3px;
+      text-shadow: 0 0 8px var(--cyan);
+    }
+    .log-box {
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: 'VT323', monospace;
+      font-size: 0.95rem;
+      color: #8ee8f8;
+      white-space: pre-wrap;
+      max-height: 240px;
+      overflow-y: auto;
+      line-height: 1.65;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,245,255,0.3) transparent;
+    }
+    .log-box::-webkit-scrollbar { width: 4px; }
+    .log-box::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.3); border-radius: 2px; }
+    .log-empty { color: rgba(255,255,255,0.2); font-style: italic; }
+
+    .btn-copy {
+      margin-top: 10px;
+      background: transparent;
+      border: 1px solid rgba(255,45,120,0.5);
+      color: var(--pink);
+      font-size: 1.05rem;
+      padding: 7px 22px;
+      box-shadow: 0 0 10px rgba(255,45,120,0.2);
       letter-spacing: 2px;
+      border-radius: 6px;
+    }
+    .btn-copy:hover {
+      background: rgba(255,45,120,0.08);
+      box-shadow: 0 0 22px rgba(255,45,120,0.5);
     }
   </style>
 </head>
 <body>
 
-  <h1>✦ FEITJESKEIZER ✦</h1>
-  <p class="subtitle">SWIPE DOOR DE KENNIS</p>
+  <div class="header">
+    <h1>✦ FEITJESKEIZER ✦</h1>
+    <p class="subtitle">SWIPE DOOR DE KENNIS</p>
+  </div>
 
-  <div class="card" id="card">
-    <div class="fact-number" id="fact-number">FEIT #1</div>
-    <div class="fact-text" id="fact-text"></div>
-    <div class="buttons">
-      <button class="btn-dislike" onclick="react('dislike')">✕ SKIP</button>
-      <button class="btn-like" onclick="react('like')">♥ THNKS</button>
-    </div>
-    <div class="progress" id="progress"></div>
-    <div class="hint">← SKIP &nbsp;|&nbsp; LIKE →</div>
+  <div class="counters">
+    <span class="counter likes" id="cnt-likes">♥ 0</span>
+    <span class="counter skips" id="cnt-skips">✕ 0</span>
+  </div>
 
-    <div class="done-screen" id="done-screen">
-      <h2>✦ KLAAR ✦</h2>
-      <p>Je hebt alle feitjes gezien! Kopieer de log hieronder en geef die aan AI voor een nieuwe selectie.</p>
-      <button class="btn-restart" onclick="restart()">↺ OPNIEUW</button>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+
+  <div class="card-wrap">
+    <div class="card card-in" id="card">
+      <div class="card-overlay like-flash" id="overlay-like">♥ LIKE</div>
+      <div class="card-overlay skip-flash" id="overlay-skip">✕ SKIP</div>
+      <div class="fact-number" id="fact-number">FEIT #1</div>
+      <div class="fact-text" id="fact-text"></div>
+      <div class="buttons">
+        <button class="btn-dislike" id="btn-skip" onclick="react('dislike')">✕ SKIP</button>
+        <button class="btn-like"    id="btn-like" onclick="react('like')">♥ LIKE</button>
+      </div>
+      <div class="hint">← SKIP &nbsp;|&nbsp; LIKE →</div>
+
+      <div class="done-screen" id="done-screen">
+        <h2>✦ KLAAR ✦</h2>
+        <div class="done-stats">
+          <span class="done-stat liked"   id="done-likes">♥ 0 geliked</span>
+          <span class="done-stat skipped" id="done-skips">✕ 0 geskipt</span>
+        </div>
+        <p>Kopieer de log en geef die aan AI voor een nieuwe set feitjes op maat.</p>
+        <button class="btn-restart" onclick="restart()">↺ OPNIEUW</button>
+      </div>
     </div>
   </div>
 
   <div class="log-section">
-    <h2>// LOG</h2>
+    <div class="log-header">
+      <h2>// LOG</h2>
+      <button class="btn-copy" onclick="copyLog()">⎘ KOPIEER LOG</button>
+    </div>
     <div class="log-box" id="log-box"><span class="log-empty">Nog geen reacties...</span></div>
-    <button class="btn-copy" onclick="copyLog()">⎘ KOPIEER LOG</button>
   </div>
 
   <script>
@@ -689,9 +867,9 @@
       "Twee derde van de wereld heeft nooit sneeuw gezien.",
     ];
 
-    let volgorde = [];
-    let huidigIndex = 0;
-    let log = [];
+    let volgorde = [], huidigIndex = 0, log = [], busy = false;
+
+    const $ = id => document.getElementById(id);
 
     function shuffle(arr) {
       const a = [...arr];
@@ -705,69 +883,151 @@
     function start() {
       volgorde = shuffle(feiten.map((_, i) => i));
       huidigIndex = 0;
-      toonFeit();
+      log = [];
+      busy = false;
+      updateCounters();
+      updateProgress();
+      // Reset done screen
+      $('done-screen').style.display = 'none';
+      $('fact-text').style.display = '';
+      $('fact-number').style.display = '';
+      document.querySelector('.buttons').style.display = '';
+      document.querySelector('.hint').style.display = '';
+      // Animate card in
+      const card = $('card');
+      card.classList.remove('fly-right', 'fly-left', 'card-in');
+      void card.offsetWidth;
+      card.classList.add('card-in');
+      loadFeit();
     }
 
-    function toonFeit() {
-      const card = document.getElementById('card');
-      const doneScreen = document.getElementById('done-screen');
-      const factText = document.getElementById('fact-text');
-      const factNumber = document.getElementById('fact-number');
-      const progress = document.getElementById('progress');
-      const buttons = card.querySelector('.buttons');
-
-      if (huidigIndex >= volgorde.length) {
-        // Klaar
-        factText.style.display = 'none';
-        factNumber.style.display = 'none';
-        progress.style.display = 'none';
-        buttons.style.display = 'none';
-        doneScreen.style.display = 'flex';
-        return;
-      }
-
+    function loadFeit() {
       const feitIdx = volgorde[huidigIndex];
-      factText.classList.add('fade-out');
-      setTimeout(() => {
-        factText.textContent = feiten[feitIdx];
-        factNumber.textContent = `FEIT #${feitIdx + 1}`;
-        progress.textContent = `${huidigIndex + 1} / ${volgorde.length}`;
-        factText.classList.remove('fade-out');
-      }, 300);
+      $('fact-text').textContent = feiten[feitIdx];
+      $('fact-number').textContent = `FEIT #${feitIdx + 1}`;
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const pct = volgorde.length ? (huidigIndex / volgorde.length) * 100 : 0;
+      $('progress-bar').style.width = pct + '%';
+    }
+
+    function updateCounters() {
+      const likes = log.filter(e => e.reactie === 'like').length;
+      const skips = log.filter(e => e.reactie === 'dislike').length;
+      $('cnt-likes').textContent = `♥ ${likes}`;
+      $('cnt-skips').textContent = `✕ ${skips}`;
+    }
+
+    function bumpCounter(type) {
+      const el = type === 'like' ? $('cnt-likes') : $('cnt-skips');
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
+      setTimeout(() => el.classList.remove('bump'), 200);
+    }
+
+    function showOverlay(type) {
+      const el = type === 'like' ? $('overlay-like') : $('overlay-skip');
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 320);
     }
 
     function react(reactie) {
-      if (huidigIndex >= volgorde.length) return;
+      if (busy || huidigIndex >= volgorde.length) return;
+      busy = true;
+
       const feitIdx = volgorde[huidigIndex];
-      const feit = feiten[feitIdx];
-      log.push({ feit, reactie });
+      log.push({ feit: feiten[feitIdx], reactie });
       updateLog();
-      huidigIndex++;
-      toonFeit();
+      updateCounters();
+      bumpCounter(reactie);
+      showOverlay(reactie);
+
+      // Fly card out
+      const card = $('card');
+      card.classList.add(reactie === 'like' ? 'fly-right' : 'fly-left');
+
+      setTimeout(() => {
+        huidigIndex++;
+        card.classList.remove('fly-right', 'fly-left');
+
+        if (huidigIndex >= volgorde.length) {
+          showDone();
+          busy = false;
+          return;
+        }
+
+        loadFeit();
+        card.classList.remove('card-in');
+        void card.offsetWidth;
+        card.classList.add('card-in');
+        busy = false;
+      }, 340);
+    }
+
+    function showDone() {
+      const likes = log.filter(e => e.reactie === 'like').length;
+      const skips = log.filter(e => e.reactie === 'dislike').length;
+      $('done-likes').textContent = `♥ ${likes} geliked`;
+      $('done-skips').textContent = `✕ ${skips} geskipt`;
+      $('fact-text').style.display = 'none';
+      $('fact-number').style.display = 'none';
+      document.querySelector('.buttons').style.display = 'none';
+      document.querySelector('.hint').style.display = 'none';
+      $('done-screen').style.display = 'flex';
+      $('progress-bar').style.width = '100%';
+    }
+
+    function restart() {
+      updateLog(); // reset first
+      log = [];
+      updateLog();
+      start();
     }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'l') react('like');
-      if (e.key === 'ArrowLeft' || e.key === 's') react('dislike');
+      if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') react('like');
+      if (e.key === 'ArrowLeft'  || e.key === 's' || e.key === 'S') react('dislike');
     });
 
     // Touch swipe
-    let touchStartX = 0;
-    document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    let touchStartX = 0, touchStartY = 0;
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
     document.addEventListener('touchend', e => {
       const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 60) react(dx > 0 ? 'like' : 'dislike');
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        react(dx > 0 ? 'like' : 'dislike');
+      }
     }, { passive: true });
 
+    // Card tilt on mouse move
+    const cardEl = $('card');
+    cardEl.addEventListener('mousemove', e => {
+      if (busy) return;
+      const r = cardEl.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      cardEl.style.transform = `perspective(800px) rotateY(${x * 6}deg) rotateX(${-y * 4}deg)`;
+    });
+    cardEl.addEventListener('mouseleave', () => {
+      cardEl.style.transform = '';
+    });
+
     function updateLog() {
-      const box = document.getElementById('log-box');
+      const box = $('log-box');
       if (log.length === 0) {
         box.innerHTML = '<span class="log-empty">Nog geen reacties...</span>';
         return;
       }
       box.textContent = log.map(e =>
-        `[${e.reactie === 'like' ? '♥ LIKE   ' : '✕ SKIP   '}] ${e.feit}`
+        `[${e.reactie === 'like' ? '♥ LIKE  ' : '✕ SKIP  '}] ${e.feit}`
       ).join('\n');
       box.scrollTop = box.scrollHeight;
     }
@@ -787,18 +1047,6 @@
         btn.textContent = '✓ GEKOPIEERD!';
         setTimeout(() => btn.textContent = orig, 2000);
       });
-    }
-
-    function restart() {
-      log = [];
-      updateLog();
-      const card = document.getElementById('card');
-      card.querySelector('.fact-text').style.display = '';
-      card.querySelector('.fact-number').style.display = '';
-      card.querySelector('#progress').style.display = '';
-      card.querySelector('.buttons').style.display = '';
-      document.getElementById('done-screen').style.display = 'none';
-      start();
     }
 
     start();
