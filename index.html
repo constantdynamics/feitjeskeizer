@@ -385,12 +385,156 @@
     }
 
     .hint {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .hint-text {
       font-size: 0.8rem;
       font-weight: 600;
       letter-spacing: 0.22em;
       color: rgba(255,255,255,0.2);
       text-align: center;
+      flex: 1;
     }
+    .btn-undo, .btn-bm, .btn-export-card {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.22);
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-undo:hover  { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.25); }
+    .btn-bm          { font-size: 1.05rem; }
+    .btn-bm.actief   { color: #ffcc22; border-color: rgba(255,204,34,0.45); }
+    .btn-bm:hover    { color: #ffcc22; border-color: rgba(255,204,34,0.35); }
+    .btn-export-card { font-size: 0.95rem; }
+    .btn-export-card:hover { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.25); }
+
+    /* ── Quiz ── */
+    .quiz-toggle {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: 3px 9px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,204,34,0.28);
+      background: rgba(255,204,34,0.05);
+      color: rgba(255,204,34,0.55);
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quiz-toggle:hover    { background: rgba(255,204,34,0.12); color: rgba(255,204,34,0.9); }
+    .quiz-toggle:disabled { opacity: 0.4; cursor: default; }
+    .quiz-container {
+      display: none;
+      flex-direction: column;
+      gap: 9px;
+      padding: 10px 0 2px;
+    }
+    .quiz-container.open { display: flex; }
+    .quiz-vraag {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: rgba(255,220,80,0.9);
+      letter-spacing: 0.02em;
+      line-height: 1.45;
+    }
+    .quiz-opties { display: flex; flex-direction: column; gap: 6px; }
+    .quiz-optie {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 9px;
+      color: rgba(255,255,255,0.72);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 13px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.12s, border-color 0.12s;
+      letter-spacing: 0.02em;
+    }
+    .quiz-optie:hover:not(:disabled) { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+    .quiz-optie.correct { background: rgba(0,232,136,0.13); border-color: rgba(0,232,136,0.48); color: #00e888; }
+    .quiz-optie.fout    { background: rgba(255,80,80,0.09);  border-color: rgba(255,80,80,0.32);  color: rgba(255,110,110,0.9); }
+    .quiz-optie:disabled { cursor: default; }
+    .quiz-laden { font-size: 0.82rem; color: rgba(255,255,255,0.28); font-style: italic; }
+
+    /* ── Particles ── */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      animation: floatUp 1.3s ease-out forwards;
+      z-index: 9999;
+      user-select: none;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0)      scale(1)   rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(-130px) scale(0.3) rotate(25deg);  opacity: 0; }
+    }
+
+    /* ── Bookmarks sectie ── */
+    .bookmarks-section {
+      max-width: 540px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+      margin-top: 12px;
+    }
+    .bookmarks-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .bookmarks-section h2 {
+      font-family: 'VT323', monospace;
+      color: rgba(255,204,34,0.5);
+      font-size: 1.6rem;
+      letter-spacing: 0.2em;
+    }
+    .bookmark-box {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,204,34,0.1);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      max-height: 190px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,204,34,0.18) transparent;
+    }
+    .bookmarks-leeg {
+      font-family: 'VT323', monospace;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.14);
+      font-style: italic;
+    }
+    .bookmark-item {
+      font-family: 'VT323', monospace;
+      font-size: 1rem;
+      color: rgba(255,220,80,0.72);
+      line-height: 1.4;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .bookmark-item::before { content: '★'; color: rgba(255,204,34,0.45); flex-shrink: 0; }
 
     /* ── Done screen ── */
     .done-screen {
@@ -782,9 +926,16 @@
       <div class="card-overlay skip-flash" id="overlay-skip">✕ SKIP</div>
       <div class="fact-header">
         <div class="fact-number" id="fact-number"></div>
-        <div class="cat-badge" id="cat-badge"></div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <div class="cat-badge" id="cat-badge"></div>
+          <button class="quiz-toggle" id="quiz-toggle-btn" onclick="triggerQuiz()">⚡ QUIZ</button>
+        </div>
       </div>
       <div class="fact-text" id="fact-text"></div>
+      <div class="quiz-container" id="quiz-container">
+        <div class="quiz-vraag" id="quiz-vraag"></div>
+        <div class="quiz-opties" id="quiz-opties"></div>
+      </div>
 
       <div class="vraag-wrap" id="vraag-wrap">
         <div class="vraag-input-row">
@@ -799,7 +950,14 @@
         <button class="btn-dislike" onclick="react('dislike')">✕ SKIP</button>
         <button class="btn-like"    onclick="react('like')">♥ LIKE</button>
       </div>
-      <div class="hint">← SKIP &nbsp;·&nbsp; LIKE → &nbsp;·&nbsp; SLEEP DE KAART</div>
+      <div class="hint">
+        <button class="btn-undo" onclick="undo()" title="Undo (Z)">↩</button>
+        <span class="hint-text">← SKIP &nbsp;·&nbsp; LIKE → &nbsp;·&nbsp; SLEEP</span>
+        <div style="display:flex;gap:5px">
+          <button class="btn-bm" id="btn-bm" onclick="toggleBookmark()" title="Opslaan (B)">★</button>
+          <button class="btn-export-card" onclick="exportKaart()" title="Deel als afbeelding">📸</button>
+        </div>
+      </div>
 
       <div class="done-screen" id="done-screen">
         <h2>✦ KLAAR ✦</h2>
@@ -832,6 +990,15 @@
       <button class="btn-copy" onclick="copyLog()">⎘ KOPIEER LOG</button>
     </div>
     <div class="log-box" id="log-box"><span class="log-empty">Nog geen reacties...</span></div>
+  </div>
+
+  <div class="bookmarks-section" id="bookmarks-section">
+    <div class="bookmarks-header">
+      <h2>★ OPGESLAGEN</h2>
+    </div>
+    <div class="bookmark-box" id="bookmarks-box">
+      <span class="bookmarks-leeg">Nog niets opgeslagen...</span>
+    </div>
   </div>
 
   <script>
@@ -1290,9 +1457,11 @@
     }
 
     // ── State ──────────────────────────────────────────
-    let volgorde = [], huidigIndex = 0, log = [], busy = false, huidigVraag = null;
+    let volgorde = [], huidigIndex = 0, log = [], busy = false, huidigVraag = null, bookmarks = [];
     const STORAGE_KEY = 'feitjeskeizer_v1';
+    const BM_KEY      = 'feitjeskeizer_bookmarks';
     const $ = id => document.getElementById(id);
+    try { bookmarks = JSON.parse(localStorage.getItem(BM_KEY) || '[]'); } catch(_) {}
 
     // ── Persistence ────────────────────────────────────
     function saveState() {
@@ -1369,8 +1538,9 @@
     function showCardUI() {
       $('done-screen').style.display = 'none';
       $('fact-text').style.display = '';
-      $('fact-number').style.display = '';
+      document.querySelector('.fact-header').style.display = '';
       $('vraag-wrap').style.display = '';
+      $('quiz-container').className = 'quiz-container';
       document.querySelector('.buttons').style.display = '';
       document.querySelector('.hint').style.display = '';
     }
@@ -1397,6 +1567,14 @@
       vv.className = 'vervolgvragen';
       vv.innerHTML = '';
 
+      // Quiz reset
+      $('quiz-container').className = 'quiz-container';
+      $('quiz-vraag').innerHTML = '';
+      $('quiz-opties').innerHTML = '';
+      const qtBtn = $('quiz-toggle-btn');
+      qtBtn.disabled = false;
+      qtBtn.textContent = '⚡ QUIZ';
+
       // Categorie badge
       const cat = categoriseer(feitTekst);
       const c = CATEGORIES[cat] || {};
@@ -1405,6 +1583,9 @@
       badge.style.color = c.kleur || '#888';
       badge.style.background = c.bg || 'rgba(128,128,128,0.1)';
       badge.style.borderColor = c.border || 'rgba(128,128,128,0.3)';
+
+      // Bookmark state
+      $('btn-bm').classList.toggle('actief', bookmarks.includes(feitTekst));
 
       updateProgress();
     }
@@ -1456,6 +1637,16 @@
       updateLog();
       updateCounters();
       bumpCounter(reactie);
+
+      // Milestone particles
+      if (reactie === 'like') {
+        const likeN = log.filter(e => e.reactie === 'like').length;
+        if ([10, 25, 50, 100].includes(likeN)) {
+          const r = $('cnt-likes').getBoundingClientRect();
+          spawnParticles('♥', 22, r.left + r.width / 2, r.top + r.height / 2);
+          if (navigator.vibrate) navigator.vibrate([40, 20, 40, 20, 80]);
+        }
+      }
       setOverlay(reactie, 1);
       saveState();
 
@@ -1517,8 +1708,9 @@
         ? `Je houdt van ${top.join(' & ')} → vraag AI om nieuwe feitjes die hier dieper op ingaan.`
         : '';
       $('fact-text').style.display = 'none';
-      $('fact-number').style.display = 'none';
+      document.querySelector('.fact-header').style.display = 'none';
       $('vraag-wrap').style.display = 'none';
+      $('quiz-container').className = 'quiz-container';
       document.querySelector('.buttons').style.display = 'none';
       document.querySelector('.hint').style.display = 'none';
       $('done-screen').style.display = 'flex';
@@ -1533,8 +1725,11 @@
 
     // ── Keyboard ───────────────────────────────────────
     document.addEventListener('keydown', e => {
+      if (document.activeElement.tagName === 'INPUT') return;
       if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') react('like');
       if (e.key === 'ArrowLeft'  || e.key === 'h' || e.key === 'H') react('dislike');
+      if (e.key === 'z' || e.key === 'Z') undo();
+      if (e.key === 'b' || e.key === 'B') toggleBookmark();
     });
 
     // ── Drag-to-swipe (pointer events) ─────────────────
@@ -1791,6 +1986,225 @@
       });
     }
 
+    // ── Undo ──────────────────────────────────────────
+    function undo() {
+      if (busy || log.length === 0 || huidigIndex === 0) return;
+      const entry = log.pop();
+      huidigIndex--;
+      updateCounters();
+      updateLog();
+      saveState();
+      huidigVraag = null;
+      loadFeit();
+      const card = $('card');
+      const fromX = entry.reactie === 'like' ? 130 : -130;
+      card.classList.remove('fly-right', 'fly-left', 'card-in');
+      card.style.transition = 'none';
+      card.style.transform = `translateX(${fromX}%) rotate(${fromX > 0 ? 16 : -16}deg)`;
+      void card.offsetWidth;
+      card.style.transition = 'transform 0.38s cubic-bezier(.34,1.2,.64,1)';
+      card.style.transform = '';
+      setTimeout(() => { card.style.transition = ''; }, 400);
+    }
+
+    // ── Bookmarks ─────────────────────────────────────
+    function toggleBookmark() {
+      if (huidigIndex >= volgorde.length) return;
+      const feit = feiten[volgorde[huidigIndex]];
+      const btn  = $('btn-bm');
+      const idx  = bookmarks.indexOf(feit);
+      if (idx === -1) {
+        bookmarks.push(feit);
+        btn.classList.add('actief');
+        if (navigator.vibrate) navigator.vibrate(15);
+      } else {
+        bookmarks.splice(idx, 1);
+        btn.classList.remove('actief');
+      }
+      try { localStorage.setItem(BM_KEY, JSON.stringify(bookmarks)); } catch(_) {}
+      updateBookmarks();
+    }
+
+    function updateBookmarks() {
+      const box = $('bookmarks-box');
+      if (bookmarks.length === 0) {
+        box.innerHTML = '<span class="bookmarks-leeg">Nog niets opgeslagen...</span>';
+        return;
+      }
+      const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      box.innerHTML = bookmarks.map(f => `<div class="bookmark-item">${esc(f)}</div>`).join('');
+    }
+
+    // ── Particles ─────────────────────────────────────
+    function spawnParticles(emoji, count, x, y) {
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const el = document.createElement('span');
+          el.className = 'particle';
+          el.textContent = emoji;
+          el.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
+          el.style.top  = y + 'px';
+          el.style.fontSize = (0.9 + Math.random() * 0.8) + 'rem';
+          el.style.animationDuration = (0.85 + Math.random() * 0.55) + 's';
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), 1600);
+        }, i * 38);
+      }
+    }
+
+    // ── Quiz ──────────────────────────────────────────
+    async function triggerQuiz() {
+      const apiKey = getApiKey();
+      const btn = $('quiz-toggle-btn');
+      if (!apiKey) {
+        const orig = btn.textContent;
+        btn.textContent = '⚡ Vereist API-sleutel';
+        setTimeout(() => { btn.textContent = orig; }, 2500);
+        return;
+      }
+      btn.disabled = true;
+      $('quiz-container').className = 'quiz-container open';
+      $('quiz-vraag').innerHTML = '<span class="quiz-laden">Quiz genereren...</span>';
+      $('quiz-opties').innerHTML = '';
+      const feitTekst = feiten[volgorde[huidigIndex]];
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 260,
+            messages: [{ role: 'user', content:
+              `Feit: "${feitTekst}"\n\nMaak een quizvraag. Antwoord uitsluitend als JSON:\n{"v":"vraag?","o":["juist antwoord","fout1","fout2","fout3"],"c":0}`
+            }]
+          })
+        });
+        if (!res.ok) throw new Error('API fout');
+        const data = await res.json();
+        let tekst = data.content[0].text.trim();
+        const m = tekst.match(/\{[\s\S]*\}/);
+        if (m) tekst = m[0];
+        const parsed = JSON.parse(tekst);
+        $('quiz-vraag').textContent = parsed.v;
+        const shuffled = (parsed.o || [])
+          .map((o, i) => ({ o, juist: i === (parsed.c ?? 0) }))
+          .sort(() => Math.random() - 0.5);
+        const optiesEl = $('quiz-opties');
+        shuffled.forEach(({ o, juist }) => {
+          const b = document.createElement('button');
+          b.className = 'quiz-optie';
+          b.textContent = o;
+          b.onclick = () => {
+            optiesEl.querySelectorAll('.quiz-optie').forEach(x => {
+              x.disabled = true;
+              if (x === b) x.classList.add(juist ? 'correct' : 'fout');
+              else if (shuffled.find(s => s.juist)?.o === x.textContent) x.classList.add('correct');
+            });
+            if (juist && navigator.vibrate) navigator.vibrate(60);
+          };
+          optiesEl.appendChild(b);
+        });
+      } catch (err) {
+        $('quiz-vraag').innerHTML = `<span style="color:rgba(255,110,110,0.8);font-size:0.85rem">Fout: ${err.message}</span>`;
+      }
+      btn.disabled = false;
+    }
+
+    // ── Export als afbeelding ─────────────────────────
+    function rrect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.lineTo(x+w-r, y); ctx.arcTo(x+w, y, x+w, y+r, r);
+      ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
+      ctx.lineTo(x+r, y+h); ctx.arcTo(x, y+h, x, y+h-r, r);
+      ctx.lineTo(x, y+r); ctx.arcTo(x, y, x+r, y, r);
+      ctx.closePath();
+    }
+
+    function wrapText(ctx, tekst, maxW) {
+      const words = tekst.split(' ');
+      const lines = [];
+      let line = '';
+      for (const w of words) {
+        const test = line ? line + ' ' + w : w;
+        if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+        else line = test;
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    async function exportKaart() {
+      if (huidigIndex >= volgorde.length) return;
+      await document.fonts.ready;
+      const W = 540, H = 370, S = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = W * S; canvas.height = H * S;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(S, S);
+
+      // Achtergrond
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0, '#16063a'); bg.addColorStop(1, '#080218');
+      rrect(ctx, 0, 0, W, H, 20); ctx.fillStyle = bg; ctx.fill();
+
+      // Border
+      rrect(ctx, 0.5, 0.5, W-1, H-1, 20);
+      ctx.strokeStyle = 'rgba(204,68,255,0.4)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      const feitTekst = feiten[volgorde[huidigIndex]];
+      const cat = categoriseer(feitTekst);
+      const c = CATEGORIES[cat] || {};
+
+      // Feit-nummer
+      ctx.font = 'bold 12px "VT323", monospace';
+      ctx.fillStyle = 'rgba(204,68,255,0.55)';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`FEIT ${huidigIndex + 1} / ${volgorde.length}`, 26, 24);
+
+      // Categorie badge
+      ctx.font = 'bold 10px Rajdhani, system-ui, sans-serif';
+      const catLabel = cat.toUpperCase();
+      const catW = ctx.measureText(catLabel).width + 18;
+      const bx = W - 26 - catW, by = 18;
+      rrect(ctx, bx, by, catW, 22, 11);
+      ctx.fillStyle = c.bg || 'rgba(128,128,128,0.15)'; ctx.fill();
+      rrect(ctx, bx, by, catW, 22, 11);
+      ctx.strokeStyle = c.border || 'rgba(128,128,128,0.3)'; ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.fillStyle = c.kleur || '#888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(catLabel, bx + 9, by + 11);
+
+      // Feit-tekst
+      const fs = feitTekst.length > 130 ? 17 : feitTekst.length > 80 ? 20 : 23;
+      ctx.font = `600 ${fs}px Rajdhani, system-ui, sans-serif`;
+      ctx.fillStyle = 'rgba(255,255,255,0.93)';
+      ctx.textBaseline = 'top';
+      const regels = wrapText(ctx, feitTekst, W - 52);
+      let y = 64;
+      for (const r of regels) { ctx.fillText(r, 26, y); y += fs * 1.58; }
+
+      // Branding
+      ctx.font = '700 11px Rajdhani, system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(204,68,255,0.38)';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('✦ FEITJESKEIZER', 26, H - 18);
+
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `feit-${huidigIndex + 1}.png`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      });
+    }
+
+    updateBookmarks();
     init();
   </script>
 </body>
