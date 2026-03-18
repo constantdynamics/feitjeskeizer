@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Feitjeskeizer</title>
+  <meta name="theme-color" content="#06000d">
+  <meta name="description" content="Swipe door verrassende feiten — de Tinder voor kennis">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Feitjeskeizer">
+  <link rel="manifest" href="manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=VT323&family=Rajdhani:wght@500;600;700&family=Pacifico&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,6 +79,37 @@
       95% { opacity: 1; }
       97% { opacity: 0.88; }
       98% { opacity: 1; }
+    }
+
+    /* ── Dagelijks feit ── */
+    .dagelijks-banner {
+      max-width: 540px; width: 100%;
+      position: relative; z-index: 2;
+      background: rgba(255,204,34,0.05);
+      border: 1px solid rgba(255,204,34,0.2);
+      border-radius: 14px;
+      padding: 10px 16px 12px;
+      margin-bottom: 10px;
+      cursor: default;
+    }
+    .dagelijks-kop {
+      font-family: 'VT323', monospace;
+      font-size: 0.88rem; letter-spacing: 0.18em;
+      color: rgba(255,204,34,0.5);
+      margin-bottom: 4px;
+    }
+    .dagelijks-tekst {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem; font-weight: 600; line-height: 1.5;
+      color: rgba(255,230,120,0.82);
+    }
+    .dagelijks-cat {
+      display: inline-block; margin-top: 6px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      padding: 1px 8px; border-radius: 20px;
+      border: 1px solid rgba(255,204,34,0.25);
+      color: rgba(255,204,34,0.6);
+      background: rgba(255,204,34,0.07);
     }
 
     /* ── Header ── */
@@ -1076,6 +1114,12 @@
     <h1>Feitjeskeizer</h1>
     <div class="header-brush"></div>
     <p class="subtitle">✦ SWIPE DOOR DE KENNIS ✦</p>
+  </div>
+
+  <div class="dagelijks-banner" id="dagelijks-banner">
+    <div class="dagelijks-kop">◈ FEIT VAN DE DAG</div>
+    <div class="dagelijks-tekst" id="dagelijks-tekst"></div>
+    <span class="dagelijks-cat" id="dagelijks-cat"></span>
   </div>
 
   <div class="restore-banner" id="restore-banner">
@@ -2549,6 +2593,31 @@
     }
 
     updateBookmarks();
+
+    // ── Dagelijks feit ─────────────────────────────────
+    function dagelijksFeit() {
+      const nu   = new Date();
+      const dag  = Math.floor(nu.getTime() / 86400000); // epochdag
+      const idx  = dag % feiten.length;
+      const tekst = feiten[idx];
+      $('dagelijks-tekst').textContent = tekst;
+      const cat = categoriseer(tekst);
+      const catEl = $('dagelijks-cat');
+      catEl.textContent = cat;
+      const c = CATEGORIES[cat] || {};
+      if (c.kleur) {
+        catEl.style.color = c.kleur;
+        catEl.style.borderColor = c.border;
+        catEl.style.background  = c.bg;
+      }
+    }
+    dagelijksFeit();
+
+    // ── Service Worker (PWA) ────────────────────────────
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
     init();
   </script>
   <div class="wiki-tooltip" id="wiki-tooltip">
