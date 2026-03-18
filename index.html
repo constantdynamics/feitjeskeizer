@@ -376,6 +376,76 @@
     .card-wrap.stack-advance::before { transform: rotate(-0.8deg) translateY(3px) scale(0.992); }
     .card-wrap.stack-advance::after  { transform: rotate(0.5deg)  translateY(1px) scale(0.997); }
 
+    /* Morph-in: tekst verschijnt iets later dan de kaart */
+    @keyframes textIn {
+      from { opacity: 0; transform: translateY(9px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card.card-in .fact-text { animation: textIn 0.32s ease 0.14s both; }
+
+    /* Inline wiki chips */
+    .wiki-chip {
+      border-bottom: 1px dotted rgba(100,180,255,0.45);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .wiki-chip:hover { color: rgba(140,210,255,0.95); }
+
+    /* Wiki tooltip */
+    .wiki-tooltip {
+      position: fixed;
+      max-width: 300px;
+      background: rgba(8,2,28,0.97);
+      border: 1px solid rgba(80,160,255,0.28);
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.5;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+      z-index: 9998;
+      backdrop-filter: blur(18px);
+      display: none;
+    }
+    .wiki-tooltip-title {
+      font-size: 0.92rem; font-weight: 700;
+      color: rgba(100,195,255,0.9);
+      margin-bottom: 5px;
+    }
+    .wiki-tooltip-link {
+      display: block; margin-top: 8px;
+      font-size: 0.78rem; color: rgba(80,160,255,0.6);
+      text-decoration: none;
+    }
+    .wiki-tooltip-link:hover { color: rgba(100,195,255,0.9); }
+
+    /* Fact meta: jaar + bron */
+    .fact-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-top: -6px;
+    }
+    .jaar-badge {
+      font-family: 'VT323', monospace;
+      font-size: 0.9rem;
+      color: rgba(255,204,34,0.5);
+      letter-spacing: 0.08em;
+    }
+    .bron-label {
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.16);
+    }
+    .antwoord-bron {
+      display: block; margin-top: 6px;
+      font-size: 0.78rem; font-weight: 600;
+      color: rgba(80,160,255,0.6);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .antwoord-bron:hover { color: rgba(100,195,255,0.9); }
+
     /* Card content */
     .fact-number {
       font-family: 'VT323', monospace;
@@ -996,6 +1066,10 @@
         </div>
       </div>
       <div class="fact-text" id="fact-text"></div>
+      <div class="fact-meta" id="fact-meta">
+        <span class="jaar-badge" id="jaar-badge"></span>
+        <span class="bron-label" id="bron-label"></span>
+      </div>
       <div class="quiz-container" id="quiz-container">
         <div class="quiz-vraag" id="quiz-vraag"></div>
         <div class="quiz-opties" id="quiz-opties"></div>
@@ -1602,6 +1676,7 @@
     function showCardUI() {
       $('done-screen').style.display = 'none';
       $('fact-text').style.display = '';
+      $('fact-meta').style.display = '';
       document.querySelector('.fact-header').style.display = '';
       $('vraag-wrap').style.display = '';
       $('quiz-container').className = 'quiz-container';
@@ -1622,8 +1697,16 @@
 
     function loadFeit() {
       const feitTekst = feiten[volgorde[huidigIndex]];
-      $('fact-text').textContent = feitTekst;
+      $('fact-text').innerHTML = linkify(feitTekst);
       $('fact-number').textContent = `FEIT ${huidigIndex + 1} / ${volgorde.length}`;
+
+      // Jaar-indicator: extraheer eerste 4-cijferig jaar uit de tekst
+      const jaarMatch = feitTekst.match(/\b(1[0-9]{3}|20[0-2][0-9])\b/);
+      const jaarEl = $('jaar-badge');
+      jaarEl.textContent = jaarMatch ? `◈ ${jaarMatch[1]}` : '';
+
+      // Bron-label
+      $('bron-label').textContent = 'Bron: Wikipedia';
       $('vraag-input').value = '';
       const ant = $('antwoord');
       ant.className = 'antwoord';
@@ -1794,6 +1877,7 @@
         ? `Je houdt van ${top.join(' & ')} → vraag AI om nieuwe feitjes die hier dieper op ingaan.`
         : '';
       $('fact-text').style.display = 'none';
+      $('fact-meta').style.display = 'none';
       document.querySelector('.fact-header').style.display = 'none';
       $('vraag-wrap').style.display = 'none';
       $('quiz-container').className = 'quiz-container';
@@ -1824,7 +1908,7 @@
     const SWIPE_THRESH = 90;
 
     cardEl.addEventListener('pointerdown', e => {
-      if (busy || e.target.closest('button')) return;
+      if (busy || e.target.closest('button') || e.target.closest('.wiki-chip')) return;
       isDragging = true;
       dragStartX = e.clientX;
       dragStartY = e.clientY;
@@ -1950,7 +2034,7 @@
               model: 'claude-haiku-4-5-20251001',
               max_tokens: 300,
               messages: [{ role: 'user', content:
-                `Feit: "${feitTekst}"\n\nVraag: ${vraag}\n\nAntwoord uitsluitend als JSON, geen andere tekst:\n{"a":"antwoord max 3 zinnen","v":["vervolgvraag1?","vervolgvraag2?","vervolgvraag3?"]}`
+                `Feit: "${feitTekst}"\n\nVraag: ${vraag}\n\nAntwoord uitsluitend als JSON, geen andere tekst:\n{"a":"antwoord max 3 zinnen","v":["vervolgvraag1?","vervolgvraag2?","vervolgvraag3?"],"bron":"https://nl.wikipedia.org/wiki/Relevante_Pagina_of_lege_string"}`
               }]
             })
           });
@@ -1963,7 +2047,18 @@
           try { parsed = JSON.parse(tekst); } catch(_) { parsed = { a: tekst, v: [] }; }
 
           ant.className = 'antwoord zichtbaar';
-          ant.textContent = parsed.a || tekst;
+          ant.innerHTML = '';
+          const antTekst = document.createTextNode(parsed.a || tekst);
+          ant.appendChild(antTekst);
+          if (parsed.bron && parsed.bron.startsWith('http')) {
+            const bronLink = document.createElement('a');
+            bronLink.className = 'antwoord-bron';
+            bronLink.href = parsed.bron;
+            bronLink.target = '_blank';
+            bronLink.rel = 'noopener';
+            bronLink.textContent = '→ Lees meer op Wikipedia';
+            ant.appendChild(bronLink);
+          }
           huidigVraag = vraag;
 
           // Vervolgvragen chips
@@ -2030,6 +2125,63 @@
       const page = pages?.[Object.keys(pages)[0]];
       return page?.extract || null;
     }
+
+    // ── Linkify: wrap proper nouns in wiki-chips ──────────
+    function linkify(tekst) {
+      // Match capitalized words (likely proper nouns) of 4+ chars, not at start of sentence
+      return tekst.replace(/(?<=[^.!?\n]\s)([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüý]{3,}(?:\s[A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüý]{2,})*)/g,
+        (_, m) => `<span class="wiki-chip" data-term="${m}">${m}</span>`
+      );
+    }
+
+    // ── Wiki tooltip ──────────────────────────────────────
+    let wikiTooltipTimeout = null;
+    async function toonWikiTooltip(term, el) {
+      const tooltip = $('wiki-tooltip');
+      clearTimeout(wikiTooltipTimeout);
+      // Position near element
+      const rect = el.getBoundingClientRect();
+      tooltip.style.display = 'block';
+      tooltip.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
+      tooltip.style.top  = (rect.bottom + 8) + 'px';
+      $('wiki-tooltip-title').textContent = term;
+      $('wiki-tooltip-text').textContent  = '…';
+      $('wiki-tooltip-link').textContent  = '';
+      $('wiki-tooltip-link').href = '';
+      try {
+        const base = 'https://nl.wikipedia.org';
+        const searchUrl = `${base}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term)}&utf8=&format=json&origin=*&srlimit=1`;
+        const s = await fetch(searchUrl).then(r => r.json());
+        const resultaat = s.query?.search?.[0];
+        if (!resultaat) { tooltip.style.display = 'none'; return; }
+        const titel = encodeURIComponent(resultaat.title);
+        const extractUrl = `${base}/w/api.php?action=query&prop=extracts&exsentences=2&explaintext=1&titles=${titel}&format=json&origin=*`;
+        const e = await fetch(extractUrl).then(r => r.json());
+        const pages = e.query?.pages;
+        const page  = pages?.[Object.keys(pages)[0]];
+        const extract = page?.extract?.replace(/\n.*/s, '') || '';
+        if (!extract) { tooltip.style.display = 'none'; return; }
+        $('wiki-tooltip-text').textContent  = extract.slice(0, 180) + (extract.length > 180 ? '…' : '');
+        const wikiLink = `${base}/wiki/${titel}`;
+        $('wiki-tooltip-link').textContent  = '→ Wikipedia';
+        $('wiki-tooltip-link').href = wikiLink;
+      } catch(_) { tooltip.style.display = 'none'; }
+    }
+
+    // Hide tooltip when clicking elsewhere
+    document.addEventListener('click', e => {
+      if (!e.target.classList.contains('wiki-chip')) {
+        $('wiki-tooltip').style.display = 'none';
+      }
+    });
+
+    // Delegation: click on wiki-chip in fact-text
+    $('fact-text').addEventListener('click', e => {
+      const chip = e.target.closest('.wiki-chip');
+      if (!chip) return;
+      e.stopPropagation();
+      toonWikiTooltip(chip.dataset.term, chip);
+    });
 
     // Druk Enter in het veld
     $('vraag-input').addEventListener('keydown', e => {
@@ -2302,5 +2454,10 @@
     updateBookmarks();
     init();
   </script>
+  <div class="wiki-tooltip" id="wiki-tooltip">
+    <div class="wiki-tooltip-title" id="wiki-tooltip-title"></div>
+    <div id="wiki-tooltip-text"></div>
+    <a class="wiki-tooltip-link" id="wiki-tooltip-link" target="_blank" rel="noopener"></a>
+  </div>
 </body>
 </html>
