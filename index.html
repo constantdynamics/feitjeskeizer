@@ -82,6 +82,10 @@
     }
 
     /* ── Dagelijks feit ── */
+    @keyframes bannerPulse {
+      0%,100% { box-shadow: 0 0 0px rgba(255,204,34,0);     border-color: rgba(255,204,34,0.2); }
+      50%      { box-shadow: 0 0 18px rgba(255,204,34,0.18); border-color: rgba(255,204,34,0.42); }
+    }
     .dagelijks-banner {
       max-width: 540px; width: 100%;
       position: relative; z-index: 2;
@@ -89,8 +93,9 @@
       border: 1px solid rgba(255,204,34,0.2);
       border-radius: 14px;
       padding: 10px 16px 12px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       cursor: default;
+      animation: bannerPulse 3.5s ease-in-out infinite;
     }
     .dagelijks-kop {
       font-family: 'VT323', monospace;
@@ -237,20 +242,28 @@
     .progress-bar-wrap {
       width: 100%;
       max-width: 540px;
+      height: 22px;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 14px;
+      overflow: visible;
+    }
+    .progress-bar-wrap::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
       height: 3px;
       background: rgba(255,255,255,0.06);
       border-radius: 3px;
-      margin-bottom: 5px;
-      position: relative;
-      z-index: 2;
-      overflow: hidden;
     }
     .progress-bar-fill {
-      height: 100%;
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 3px;
       background: linear-gradient(90deg, var(--violet), var(--pink), var(--purple));
       border-radius: 3px;
       transition: width 0.45s cubic-bezier(.4,0,.2,1);
-      position: relative;
+      overflow: hidden;
     }
     .progress-bar-fill::after {
       content: '';
@@ -262,17 +275,14 @@
       from { transform: translateX(-100%); }
       to   { transform: translateX(300%); }
     }
-    .progress-label {
-      width: 100%;
-      max-width: 540px;
+    #progress-label {
+      position: absolute;
+      right: 0; top: 0;
       font-size: 0.82rem;
       font-weight: 700;
       letter-spacing: 0.18em;
       color: rgba(255,255,255,0.28);
-      text-align: right;
-      margin-bottom: 14px;
-      position: relative;
-      z-index: 2;
+      line-height: 1;
     }
 
     /* ── Card stack ── */
@@ -565,15 +575,20 @@
         0 8px 32px rgba(153,0,238,0.4);
     }
     .btn-dislike {
-      background: rgba(204,68,255,0.07);
-      color: rgba(204,68,255,0.82);
-      border: 1px solid rgba(204,68,255,0.28);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      background: rgba(204,68,255,0.08);
+      color: rgba(204,68,255,0.85);
+      border: 1px solid rgba(204,68,255,0.32);
+      box-shadow:
+        0 4px 16px rgba(0,0,0,0.28),
+        inset 0 1px 0 rgba(204,68,255,0.1);
     }
     .btn-dislike:hover {
       transform: translateY(-3px);
-      border-color: rgba(204,68,255,0.5);
-      box-shadow: 0 8px 28px rgba(204,68,255,0.14);
+      background: rgba(204,68,255,0.14);
+      border-color: rgba(204,68,255,0.55);
+      box-shadow:
+        0 8px 28px rgba(204,68,255,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.06);
     }
 
     .hint {
@@ -718,10 +733,11 @@
       font-style: italic;
     }
     .bookmark-item {
-      font-family: 'VT323', monospace;
-      font-size: 1rem;
-      color: rgba(255,220,80,0.72);
-      line-height: 1.4;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: rgba(255,220,80,0.8);
+      line-height: 1.45;
       display: flex;
       gap: 8px;
       align-items: flex-start;
@@ -1136,9 +1152,9 @@
   </div>
 
   <div class="progress-bar-wrap">
+    <span id="progress-label"></span>
     <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
   </div>
-  <div class="progress-label" id="progress-label"></div>
 
   <div class="card-wrap">
     <div class="card-border-glow"></div>
