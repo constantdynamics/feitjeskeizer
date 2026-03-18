@@ -274,6 +274,7 @@
         0 12px 48px rgba(0,0,0,0.55),
         0 0 60px rgba(153,0,238,0.08),
         inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: box-shadow 0.08s linear, border-color 0.08s linear;
       display: flex;
       flex-direction: column;
       gap: 14px;
@@ -293,34 +294,8 @@
       pointer-events: none;
     }
 
-    /* Overlays */
-    .card-overlay {
-      position: absolute;
-      top: 20px;
-      padding: 8px 22px;
-      border-radius: 8px;
-      font-family: 'VT323', monospace;
-      font-size: 2.4rem;
-      letter-spacing: 0.1em;
-      opacity: 0;
-      pointer-events: none;
-      border: 3px solid;
-      z-index: 10;
-    }
-    .like-flash {
-      right: 22px;
-      color: var(--rose);
-      border-color: var(--rose);
-      text-shadow: 0 0 16px var(--rose);
-      transform: rotate(7deg);
-    }
-    .skip-flash {
-      left: 22px;
-      color: var(--violet);
-      border-color: var(--violet);
-      text-shadow: 0 0 16px var(--violet);
-      transform: rotate(-7deg);
-    }
+    /* Overlays — verborgen, glow wordt via JS op .card gezet */
+    .card-overlay { display: none; }
 
     /* Animations */
     @keyframes flyRight {
@@ -1229,13 +1204,21 @@
     }
 
     function setOverlay(type, opacity) {
-      $('overlay-like').style.opacity = type === 'like'    ? opacity : 0;
-      $('overlay-skip').style.opacity = type === 'dislike' ? opacity : 0;
+      const card = $('card');
+      const o = Math.min(opacity, 1);
+      if (type === 'like') {
+        card.style.borderColor = `rgba(255,0,153,${0.22 + o * 0.78})`;
+        card.style.boxShadow   = `0 2px 4px rgba(0,0,0,0.4), 0 12px 48px rgba(0,0,0,0.55), 0 0 ${Math.round(o * 80)}px rgba(255,0,153,${(o * 0.85).toFixed(2)}), 0 0 ${Math.round(o * 140)}px rgba(255,0,153,${(o * 0.35).toFixed(2)}), inset 0 1px 0 rgba(255,255,255,0.06)`;
+      } else {
+        card.style.borderColor = `rgba(204,68,255,${0.22 + o * 0.78})`;
+        card.style.boxShadow   = `0 2px 4px rgba(0,0,0,0.4), 0 12px 48px rgba(0,0,0,0.55), 0 0 ${Math.round(o * 80)}px rgba(204,68,255,${(o * 0.85).toFixed(2)}), 0 0 ${Math.round(o * 140)}px rgba(204,68,255,${(o * 0.35).toFixed(2)}), inset 0 1px 0 rgba(255,255,255,0.06)`;
+      }
     }
 
     function hideOverlays() {
-      $('overlay-like').style.opacity = 0;
-      $('overlay-skip').style.opacity = 0;
+      const card = $('card');
+      card.style.borderColor = '';
+      card.style.boxShadow   = '';
     }
 
     // ── React ──────────────────────────────────────────
