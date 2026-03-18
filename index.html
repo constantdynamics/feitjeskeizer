@@ -585,6 +585,106 @@
       border-left-color: rgba(255,80,80,0.35);
     }
 
+    /* ── Categorie badge ── */
+    .fact-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .cat-badge {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+
+    /* ── Vervolgvragen chips ── */
+    .vervolgvragen {
+      display: none;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 4px;
+    }
+    .vervolgvragen.zichtbaar { display: flex; }
+    .vv-chip {
+      background: rgba(204,68,255,0.07);
+      border: 1px solid rgba(204,68,255,0.28);
+      border-radius: 20px;
+      color: rgba(204,68,255,0.85);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: left;
+      line-height: 1.35;
+    }
+    .vv-chip:hover {
+      background: rgba(204,68,255,0.16);
+      border-color: rgba(204,68,255,0.55);
+      color: rgba(220,140,255,0.95);
+    }
+
+    /* ── Done: categorie-verdeling ── */
+    .done-cats {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .done-cat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .done-cat-label {
+      width: 96px;
+      flex-shrink: 0;
+      text-align: right;
+      font-size: 0.8rem;
+    }
+    .done-cat-bar-wrap {
+      flex: 1;
+      height: 7px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .done-cat-bar {
+      height: 100%;
+      border-radius: 4px;
+      width: 0;
+      transition: width 0.9s cubic-bezier(.4,0,.2,1);
+    }
+    .done-cat-count {
+      width: 22px;
+      text-align: right;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.8rem;
+    }
+    .done-suggestie {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      line-height: 1.6;
+      letter-spacing: 0.04em;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 12px;
+      width: 100%;
+    }
+
     /* API-sleutel instelling */
     .api-section {
       max-width: 480px;
@@ -680,7 +780,10 @@
       <div class="card-shine"></div>
       <div class="card-overlay like-flash" id="overlay-like">♥ LIKE</div>
       <div class="card-overlay skip-flash" id="overlay-skip">✕ SKIP</div>
-      <div class="fact-number" id="fact-number"></div>
+      <div class="fact-header">
+        <div class="fact-number" id="fact-number"></div>
+        <div class="cat-badge" id="cat-badge"></div>
+      </div>
       <div class="fact-text" id="fact-text"></div>
 
       <div class="vraag-wrap" id="vraag-wrap">
@@ -689,6 +792,7 @@
           <button class="btn-vraag" id="btn-vraag">→</button>
         </div>
         <div class="antwoord" id="antwoord"></div>
+        <div class="vervolgvragen" id="vervolgvragen"></div>
       </div>
 
       <div class="buttons">
@@ -703,7 +807,8 @@
           <span class="done-stat liked"   id="done-likes">♥ 0 geliked</span>
           <span class="done-stat skipped" id="done-skips">✕ 0 geskipt</span>
         </div>
-        <p>Kopieer de log en geef die aan AI voor een nieuwe set feitjes op maat.</p>
+        <div class="done-cats" id="done-cats"></div>
+        <div class="done-suggestie" id="done-suggestie"></div>
         <button class="btn-restart" onclick="restart()">↺ OPNIEUW</button>
       </div>
     </div>
@@ -1154,8 +1259,38 @@
       "Twee derde van de wereld heeft nooit sneeuw gezien.",
     ];
 
+    // ── Categorieën ────────────────────────────────────
+    const CATEGORIES = {
+      'Ruimte':       { kleur: '#00c8ff', bg: 'rgba(0,200,255,0.1)',   border: 'rgba(0,200,255,0.32)' },
+      'Biologie':     { kleur: '#00e888', bg: 'rgba(0,232,136,0.1)',   border: 'rgba(0,232,136,0.32)' },
+      'Psychologie':  { kleur: '#ff88dd', bg: 'rgba(255,136,221,0.1)', border: 'rgba(255,136,221,0.32)' },
+      'Lichaam':      { kleur: '#ff7755', bg: 'rgba(255,119,85,0.1)',  border: 'rgba(255,119,85,0.32)' },
+      'Aarde':        { kleur: '#44ffaa', bg: 'rgba(68,255,170,0.1)',  border: 'rgba(68,255,170,0.32)' },
+      'Wetenschap':   { kleur: '#bb99ff', bg: 'rgba(187,153,255,0.1)', border: 'rgba(187,153,255,0.32)' },
+      'Technologie':  { kleur: '#ffcc22', bg: 'rgba(255,204,34,0.1)',  border: 'rgba(255,204,34,0.32)' },
+      'Taal':         { kleur: '#ff9944', bg: 'rgba(255,153,68,0.1)',  border: 'rgba(255,153,68,0.32)' },
+      'Eten':         { kleur: '#ffbb55', bg: 'rgba(255,187,85,0.1)',  border: 'rgba(255,187,85,0.32)' },
+      'Geschiedenis': { kleur: '#cc88ff', bg: 'rgba(204,136,255,0.1)', border: 'rgba(204,136,255,0.32)' },
+      'Curiosa':      { kleur: '#88ddff', bg: 'rgba(136,221,255,0.1)', border: 'rgba(136,221,255,0.32)' },
+    };
+
+    function categoriseer(tekst) {
+      const t = tekst.toLowerCase();
+      if (/zon\b|maan\b|heelal|planeet|ster\b|sterren|melkweg|iss\b|voyager|mercurius|venus\b|neptunus|uranus|zwart gat|neutronenster|pulsar|foton|sterrenstelsel|kosmisch|astronomisch|supernova|zonnestelsel|aarde draait|komeet|asteroid|licht reist|licht verliet|licht van de zon|ruimte\b/.test(t)) return 'Ruimte';
+      if (/hersenen|brein\b|geheugen|slaap\b|dromen|psycholog|bewust|gedacht|gevoel|emotie|neuron|zenuw|dunning|kruger|nostalgie|vervelen/.test(t)) return 'Psychologie';
+      if (/menselijk lichaam|bot\b|botten\b|spier|huid\b|hart\b|long\b|lever\b|tand\b|orgaan|slijmvlies|speeksel|zweet|haar groeit|spiermassa|huidcel|bloedvat|schedel|kraakbeen/.test(t)) return 'Lichaam';
+      if (/oceaan|vulkaan|continent|woestijn|sahara|everest|stille oceaan|tijdzon|tektonisch|aardverschuiving|gebergte|klimaat/.test(t)) return 'Aarde';
+      if (/atoom|kwantum|natuur(?:kund)|chemie|molecule|element\b|relativiteit|thermodynamica|isotoop|mpemba|tripelpunt|geluid reist|radioactief|straling/.test(t)) return 'Wetenschap';
+      if (/uitgevonden|uitvinding|technologie|computer|internet|code\b|robot\b|machine|software|hardware|qr-code|wifi|telefoon|fax|youtube|e-mail|email|camera|typ(?:emachine)/.test(t)) return 'Technologie';
+      if (/\btaal\b|\btalen\b|\bwoord\b|\bwoorden\b|\bletter\b|dialect|grammatica|alfabet|piraha|shakespeare.*woord|verzonnen/.test(t)) return 'Taal';
+      if (/eten\b|drinken\b|voedsel|koffie|wijn\b|bier\b|kaas\b|vlees\b|groente|chocolade|honing\b|tomaat|aardappel|banaan|wasabi|ketchup|pindakaas|recept|eetbaar|sinaasappel|fruit\b/.test(t)) return 'Eten';
+      if (/geschied(?:enis|kundig)|historisch|oorlog\b|farao\b|grieks|romein|middeleeuwen|vikingen|piramide|napoleon|hitler|lincoln|columbus|cleopatra|darwin|newton\b|tesla\b|shakespeare|julius caesar|marie curie|ww1|ww2|wereldoorlog|titanic|eiffeltoren|colosseum|berlijnse muur|nobelprijs|alfred nobel/.test(t)) return 'Geschiedenis';
+      if (/haai\b|haaien|octopus|dolfijn|olifant|mier\b|mieren\b|bij\b|bijen\b|spin\b|flamingo|pinguin|krokodil|tijger|leeuw|giraf|nijlpaard|walvis|kreeft|inktvis|zeepaard|zeekomkommer|slak\b|worm\b|luiaard|kameleon|schildpad|vlieg\b|insect|kikker|zeehond|eekhoor|kraanvogel|uil\b|wombat|kwal\b|platwormen|papegaai|struisvogel|tardigrade|zebra|karper|sloth|krokodil|dier\b|dieren\b|vogel\b|vogels\b|vis\b|vissen\b|zoogdier/.test(t)) return 'Biologie';
+      return 'Curiosa';
+    }
+
     // ── State ──────────────────────────────────────────
-    let volgorde = [], huidigIndex = 0, log = [], busy = false;
+    let volgorde = [], huidigIndex = 0, log = [], busy = false, huidigVraag = null;
     const STORAGE_KEY = 'feitjeskeizer_v1';
     const $ = id => document.getElementById(id);
 
@@ -1249,13 +1384,28 @@
     }
 
     function loadFeit() {
-      $('fact-text').textContent = feiten[volgorde[huidigIndex]];
+      const feitTekst = feiten[volgorde[huidigIndex]];
+      $('fact-text').textContent = feitTekst;
       $('fact-number').textContent = `FEIT ${huidigIndex + 1} / ${volgorde.length}`;
       $('vraag-input').value = '';
       const ant = $('antwoord');
       ant.className = 'antwoord';
       ant.textContent = '';
       $('btn-vraag').disabled = false;
+      huidigVraag = null;
+      const vv = $('vervolgvragen');
+      vv.className = 'vervolgvragen';
+      vv.innerHTML = '';
+
+      // Categorie badge
+      const cat = categoriseer(feitTekst);
+      const c = CATEGORIES[cat] || {};
+      const badge = $('cat-badge');
+      badge.textContent = cat;
+      badge.style.color = c.kleur || '#888';
+      badge.style.background = c.bg || 'rgba(128,128,128,0.1)';
+      badge.style.borderColor = c.border || 'rgba(128,128,128,0.3)';
+
       updateProgress();
     }
 
@@ -1302,7 +1452,7 @@
       busy = true;
 
       if (navigator.vibrate) navigator.vibrate(25);
-      log.push({ feit: feiten[volgorde[huidigIndex]], reactie });
+      log.push({ feit: feiten[volgorde[huidigIndex]], reactie, cat: categoriseer(feiten[volgorde[huidigIndex]]), vraag: huidigVraag });
       updateLog();
       updateCounters();
       bumpCounter(reactie);
@@ -1333,6 +1483,39 @@
       const skips = log.filter(e => e.reactie === 'dislike').length;
       $('done-likes').textContent = `♥ ${likes} geliked`;
       $('done-skips').textContent = `✕ ${skips} geskipt`;
+
+      // Categorie-verdeling van likes
+      const telling = {};
+      log.filter(e => e.reactie === 'like').forEach(e => {
+        const cat = e.cat || categoriseer(e.feit);
+        telling[cat] = (telling[cat] || 0) + 1;
+      });
+      const gesorteerd = Object.entries(telling).sort((a, b) => b[1] - a[1]).slice(0, 4);
+      const max = gesorteerd[0]?.[1] || 1;
+
+      $('done-cats').innerHTML = gesorteerd.map(([cat, n]) => {
+        const c = CATEGORIES[cat] || { kleur: '#888', bg: 'rgba(128,128,128,0.1)', border: 'rgba(128,128,128,0.3)' };
+        return `<div class="done-cat-item">
+          <span class="done-cat-label" style="color:${c.kleur}">${cat}</span>
+          <div class="done-cat-bar-wrap">
+            <div class="done-cat-bar" style="width:0;background:${c.kleur}" data-w="${Math.round((n/max)*100)}"></div>
+          </div>
+          <span class="done-cat-count">${n}</span>
+        </div>`;
+      }).join('');
+
+      // Animeer bars na render
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.querySelectorAll('.done-cat-bar').forEach(bar => {
+          bar.style.width = bar.dataset.w + '%';
+        });
+      }));
+
+      // Personalisatie-suggestie
+      const top = gesorteerd.slice(0, 2).map(([c]) => c);
+      $('done-suggestie').textContent = top.length
+        ? `Je houdt van ${top.join(' & ')} → vraag AI om nieuwe feitjes die hier dieper op ingaan.`
+        : '';
       $('fact-text').style.display = 'none';
       $('fact-number').style.display = 'none';
       $('vraag-wrap').style.display = 'none';
@@ -1409,19 +1592,22 @@
       setTimeout(() => { cardEl.style.transition = ''; }, 320);
     });
 
-    // ── Mouse tilt (hover, no drag) ────────────────────
+    // ── Mouse tilt + shine parallax (hover, no drag) ───
+    const shineEl = cardEl.querySelector('.card-shine');
     cardEl.addEventListener('mousemove', e => {
       if (busy || isDragging) return;
       const r = cardEl.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width  - 0.5;
       const y = (e.clientY - r.top)  / r.height - 0.5;
-      cardEl.style.transform = `perspective(900px) rotateY(${x * 5}deg) rotateX(${-y * 3}deg)`;
+      cardEl.style.transform = `perspective(900px) rotateY(${x * 6}deg) rotateX(${-y * 4}deg)`;
+      shineEl.style.background = `radial-gradient(circle at ${Math.round((x+0.5)*100)}% ${Math.round((y+0.5)*100)}%, rgba(255,255,255,0.13) 0%, transparent 55%)`;
     });
 
     cardEl.addEventListener('mouseleave', () => {
       if (isDragging) return;
       cardEl.style.transition = 'transform 0.45s cubic-bezier(.34,1.56,.64,1)';
       cardEl.style.transform = '';
+      shineEl.style.background = '';
       setTimeout(() => { cardEl.style.transition = ''; }, 460);
     });
 
@@ -1472,16 +1658,35 @@
             },
             body: JSON.stringify({
               model: 'claude-haiku-4-5-20251001',
-              max_tokens: 200,
+              max_tokens: 300,
               messages: [{ role: 'user', content:
-                `Feit: "${feitTekst}"\n\nVraag: ${vraag}\n\nGeef een kort, direct antwoord van maximaal 3 zinnen. Geen inleiding, geen herhaling van het feit.`
+                `Feit: "${feitTekst}"\n\nVraag: ${vraag}\n\nAntwoord uitsluitend als JSON, geen andere tekst:\n{"a":"antwoord max 3 zinnen","v":["vervolgvraag1?","vervolgvraag2?","vervolgvraag3?"]}`
               }]
             })
           });
           if (!res.ok) throw new Error(`API fout ${res.status}`);
           const data = await res.json();
+          let tekst = data.content[0].text.trim();
+          const match = tekst.match(/\{[\s\S]*\}/);
+          if (match) tekst = match[0];
+          let parsed;
+          try { parsed = JSON.parse(tekst); } catch(_) { parsed = { a: tekst, v: [] }; }
+
           ant.className = 'antwoord zichtbaar';
-          ant.textContent = data.content[0].text.trim();
+          ant.textContent = parsed.a || tekst;
+          huidigVraag = vraag;
+
+          // Vervolgvragen chips
+          const vv = $('vervolgvragen');
+          vv.innerHTML = '';
+          (parsed.v || []).slice(0, 3).forEach(q => {
+            const btn = document.createElement('button');
+            btn.className = 'vv-chip';
+            btn.textContent = q;
+            btn.onclick = () => { $('vraag-input').value = q; vraagStellen(); };
+            vv.appendChild(btn);
+          });
+          vv.className = 'vervolgvragen' + ((parsed.v || []).length ? ' zichtbaar' : '');
         } catch (err) {
           ant.className = 'antwoord fout';
           ant.textContent = `Claude-fout: ${err.message}`;
@@ -1552,9 +1757,20 @@
         box.innerHTML = '<span class="log-empty">Nog geen reacties...</span>';
         return;
       }
-      box.textContent = log.map(e =>
-        `[${e.reactie === 'like' ? '♥ LIKE  ' : '✕ SKIP  '}] ${e.feit}`
-      ).join('\n');
+      box.innerHTML = log.map(e => {
+        const c = CATEGORIES[e.cat] || {};
+        const kleur = c.kleur || '#888';
+        const icon = e.reactie === 'like'
+          ? `<span style="color:#ff0099">♥ LIKE  </span>`
+          : `<span style="color:#cc44ff">✕ SKIP  </span>`;
+        const catSpan = e.cat
+          ? `<span style="color:${kleur};opacity:0.65;font-size:0.85em"> [${e.cat}]</span>`
+          : '';
+        const vraagRegel = e.vraag
+          ? `\n  <span style="color:rgba(204,68,255,0.6)">✦ ${e.vraag}</span>`
+          : '';
+        return `<span>${icon}${e.feit}${catSpan}${vraagRegel}</span>`;
+      }).join('\n');
       box.scrollTop = box.scrollHeight;
     }
 
