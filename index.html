@@ -1363,11 +1363,27 @@
       ant.textContent = 'Zoeken op Wikipedia...';
 
       try {
-        // Zoek met feit-context + vraag, zodat "Welke?" weet welk onderwerp
         const feitTekst = feiten[volgorde[huidigIndex]];
-        const metContext = `${feitTekst} ${vraag}`;
-        let extract = await zoekWiki('nl', metContext) || await zoekWiki('en', metContext)
-                   || await zoekWiki('nl', feitTekst)  || await zoekWiki('en', feitTekst);
+
+        // Haal het onderwerp uit het feit:
+        // 1) eerste geciteerde term  'kangaroo' / "kangaroo"
+        // 2) eerste eigennaam (hoofdletter midden in zin)
+        // 3) eerste 2 woorden als fallback
+        const geciteerd = feitTekst.match(/['"'"]([^'"'"]+)['"'"]/);
+        const eigenNaam = feitTekst.match(/(?<!\.\s)(?:^|\s)([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüý]{2,})/g);
+        const onderwerp = geciteerd
+          ? geciteerd[1]
+          : eigenNaam?.length
+            ? eigenNaam[0].trim()
+            : feitTekst.split(/\s+/).slice(0, 2).join(' ');
+
+        // Zoek Wikipedia: onderwerp alleen, dan onderwerp+vraag, dan alleen vraag
+        let extract = await zoekWiki('nl', onderwerp)
+                   || await zoekWiki('en', onderwerp)
+                   || await zoekWiki('nl', `${onderwerp} ${vraag}`)
+                   || await zoekWiki('en', `${onderwerp} ${vraag}`)
+                   || await zoekWiki('nl', vraag)
+                   || await zoekWiki('en', vraag);
         if (!extract) throw new Error('niets gevonden');
 
         // Maximaal 3 zinnen
