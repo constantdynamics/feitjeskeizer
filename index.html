@@ -345,19 +345,36 @@
 
     /* Animations */
     @keyframes flyRight {
-      to { transform: translateX(135%) rotate(22deg); opacity: 0; }
+      0%   { transform: translateX(0) rotate(0deg) translateY(0); opacity: 1; }
+      100% { transform: translateX(140%) rotate(26deg) translateY(55px); opacity: 0; }
     }
     @keyframes flyLeft {
-      to { transform: translateX(-135%) rotate(-22deg); opacity: 0; }
+      0%   { transform: translateX(0) rotate(0deg) translateY(0); opacity: 1; }
+      100% { transform: translateX(-140%) rotate(-26deg) translateY(55px); opacity: 0; }
     }
-    .card.fly-right { animation: flyRight 0.36s cubic-bezier(.55,0,1,.45) forwards; }
-    .card.fly-left  { animation: flyLeft  0.36s cubic-bezier(.55,0,1,.45) forwards; }
+    .card.fly-right { animation: flyRight 0.38s cubic-bezier(.45,0,.9,.6) forwards; }
+    .card.fly-left  { animation: flyLeft  0.38s cubic-bezier(.45,0,.9,.6) forwards; }
 
     @keyframes cardIn {
-      from { transform: scale(0.9) translateY(22px); opacity: 0; }
-      to   { transform: scale(1)   translateY(0);    opacity: 1; }
+      0%   { transform: scale(0.84) translateY(32px); opacity: 0; }
+      55%  { transform: scale(1.05) translateY(-5px); opacity: 1; }
+      75%  { transform: scale(0.98) translateY(2px); }
+      100% { transform: scale(1)   translateY(0); }
     }
-    .card.card-in { animation: cardIn 0.34s cubic-bezier(.34,1.4,.64,1) forwards; }
+    .card.card-in { animation: cardIn 0.44s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+    /* Kaart ademt */
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.0028); }
+    }
+    .card-wrap.breathing { animation: breathe 4.5s ease-in-out infinite; }
+
+    /* Stack depth advance */
+    .card-wrap::before,
+    .card-wrap::after  { transition: transform 0.32s cubic-bezier(.4,0,.2,1); }
+    .card-wrap.stack-advance::before { transform: rotate(-0.8deg) translateY(3px) scale(0.992); }
+    .card-wrap.stack-advance::after  { transform: rotate(0.5deg)  translateY(1px) scale(0.997); }
 
     /* Card content */
     .fact-number {
@@ -1594,10 +1611,13 @@
 
     function animateIn() {
       const card = $('card');
+      const wrap = card.parentElement;
+      wrap.classList.remove('breathing');
       card.style.transform = '';
       card.classList.remove('fly-right', 'fly-left', 'card-in');
       void card.offsetWidth;
       card.classList.add('card-in');
+      setTimeout(() => { wrap.classList.add('breathing'); }, 460);
     }
 
     function loadFeit() {
@@ -1713,12 +1733,16 @@
       saveState();
 
       const card = $('card');
+      const wrap = card.parentElement;
+      wrap.classList.remove('breathing');
+      wrap.classList.add('stack-advance');
       card.style.transition = '';
       card.style.transform = '';
       card.classList.add(reactie === 'like' ? 'fly-right' : 'fly-left');
 
       setTimeout(() => {
         huidigIndex++;
+        wrap.classList.remove('stack-advance');
         card.classList.remove('fly-right', 'fly-left');
         card.style.transform = '';
         hideOverlays();
@@ -1728,7 +1752,7 @@
         void card.offsetWidth;
         card.classList.add('card-in');
         busy = false;
-      }, 360);
+      }, 380);
     }
 
     function showDone() {
@@ -1807,6 +1831,7 @@
       dragCurX = 0;
       cardEl.setPointerCapture(e.pointerId);
       cardEl.style.transition = 'none';
+      cardEl.parentElement.classList.remove('breathing');
     });
 
     cardEl.addEventListener('pointermove', e => {
@@ -1837,7 +1862,10 @@
       else {
         cardEl.style.transition = 'transform 0.42s cubic-bezier(.34,1.56,.64,1)';
         cardEl.style.transform = '';
-        setTimeout(() => { cardEl.style.transition = ''; }, 440);
+        setTimeout(() => {
+          cardEl.style.transition = '';
+          cardEl.parentElement.classList.add('breathing');
+        }, 450);
       }
     });
 
