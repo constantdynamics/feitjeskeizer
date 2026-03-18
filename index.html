@@ -1386,12 +1386,19 @@
                    || await zoekWiki('en', vraag);
         if (!extract) throw new Error('niets gevonden');
 
-        // Maximaal 3 zinnen
-        const zinnen = extract.match(/[^.!?]+[.!?]+[\s]*/g) || [];
-        const kort = zinnen.slice(0, 3).join('').trim();
+        // Zoek de meest relevante zinnen op basis van vraagwoorden
+        const zinnen = extract.match(/[^.!?\n]{15,}[.!?]/g) || [];
+        const zoekWoorden = [...vraag.toLowerCase().split(/\s+/),
+                             ...feitTekst.toLowerCase().split(/\s+/)]
+          .filter(w => w.length > 4);
+        const gescoord = zinnen.map(z => ({
+          zin: z.trim(),
+          score: zoekWoorden.filter(w => z.toLowerCase().includes(w)).length
+        })).sort((a, b) => b.score - a.score);
 
+        const top = gescoord.slice(0, 3).map(z => z.zin).join(' ').trim();
         ant.className = 'antwoord zichtbaar';
-        ant.textContent = kort || extract.slice(0, 300);
+        ant.textContent = top || zinnen.slice(0, 3).join(' ').trim() || extract.slice(0, 300);
       } catch (_) {
         ant.className = 'antwoord fout';
         ant.textContent = 'Geen Wikipedia-resultaat gevonden voor deze vraag.';
@@ -1400,16 +1407,20 @@
       btn.disabled = false;
     }
 
-    async function zoekWiki(lang, vraag) {
+    async function zoekWiki(lang, zoekterm) {
       const base = `https://${lang}.wikipedia.org`;
-      const searchUrl = `${base}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(vraag)}&utf8=&format=json&origin=*&srlimit=1`;
+      const searchUrl = `${base}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(zoekterm)}&utf8=&format=json&origin=*&srlimit=1`;
       const s = await fetch(searchUrl).then(r => r.json());
       const resultaat = s.query?.search?.[0];
       if (!resultaat) return null;
 
+      // Haal volledige tekst op (niet alleen intro-paragraaf)
       const titel = encodeURIComponent(resultaat.title);
-      const sum = await fetch(`${base}/api/rest_v1/page/summary/${titel}`).then(r => r.json());
-      return sum.extract || null;
+      const extractUrl = `${base}/w/api.php?action=query&prop=extracts&exsentences=30&explaintext=1&titles=${titel}&format=json&origin=*`;
+      const e = await fetch(extractUrl).then(r => r.json());
+      const pages = e.query?.pages;
+      const page = pages?.[Object.keys(pages)[0]];
+      return page?.extract || null;
     }
 
     // Druk Enter in het veld
