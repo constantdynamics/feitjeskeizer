@@ -526,6 +526,89 @@
       border-color: rgba(204,68,255,0.42);
       background: rgba(204,68,255,0.07);
     }
+
+    /* ── Vraag-sectie ──────────────────────────────────── */
+    .vraag-wrap {
+      width: 100%;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .vraag-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    #vraag-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(204,68,255,0.28);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #vraag-input:focus {
+      border-color: rgba(204,68,255,0.65);
+      background: rgba(204,68,255,0.07);
+    }
+    #vraag-input::placeholder {
+      color: rgba(255,255,255,0.25);
+      font-style: italic;
+      font-weight: 500;
+    }
+    .btn-vraag {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      padding: 10px 18px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
+    .btn-vraag:hover { opacity: 0.88; }
+    .btn-vraag:active { transform: scale(0.95); }
+    .btn-vraag:disabled { opacity: 0.4; cursor: default; }
+    .antwoord {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 600;
+      line-height: 1.6;
+      color: rgba(180,120,255,0.95);
+      letter-spacing: 0.02em;
+      padding: 10px 14px;
+      background: rgba(204,68,255,0.07);
+      border-left: 3px solid rgba(204,68,255,0.4);
+      border-radius: 0 8px 8px 0;
+      display: none;
+    }
+    .antwoord.laden {
+      display: block;
+      color: rgba(255,255,255,0.3);
+      font-style: italic;
+      background: rgba(255,255,255,0.03);
+      border-left-color: rgba(255,255,255,0.12);
+    }
+    .antwoord.zichtbaar {
+      display: block;
+    }
+    .antwoord.fout {
+      display: block;
+      color: rgba(255,120,120,0.8);
+      background: rgba(255,0,0,0.05);
+      border-left-color: rgba(255,80,80,0.35);
+    }
   </style>
 </head>
 <body>
@@ -561,6 +644,15 @@
       <div class="card-overlay skip-flash" id="overlay-skip">✕ SKIP</div>
       <div class="fact-number" id="fact-number"></div>
       <div class="fact-text" id="fact-text"></div>
+
+      <div class="vraag-wrap" id="vraag-wrap">
+        <div class="vraag-input-row">
+          <input type="text" id="vraag-input" placeholder="Stel een verdiepende vraag..." autocomplete="off" />
+          <button class="btn-vraag" id="btn-vraag">→</button>
+        </div>
+        <div class="antwoord" id="antwoord"></div>
+      </div>
+
       <div class="buttons">
         <button class="btn-dislike" onclick="react('dislike')">✕ SKIP</button>
         <button class="btn-like"    onclick="react('like')">♥ LIKE</button>
@@ -1093,6 +1185,7 @@
       $('done-screen').style.display = 'none';
       $('fact-text').style.display = '';
       $('fact-number').style.display = '';
+      $('vraag-wrap').style.display = '';
       document.querySelector('.buttons').style.display = '';
       document.querySelector('.hint').style.display = '';
     }
@@ -1108,6 +1201,11 @@
     function loadFeit() {
       $('fact-text').textContent = feiten[volgorde[huidigIndex]];
       $('fact-number').textContent = `FEIT ${huidigIndex + 1} / ${volgorde.length}`;
+      $('vraag-input').value = '';
+      const ant = $('antwoord');
+      ant.className = 'antwoord';
+      ant.textContent = '';
+      $('btn-vraag').disabled = false;
       updateProgress();
     }
 
@@ -1179,6 +1277,7 @@
       $('done-skips').textContent = `✕ ${skips} geskipt`;
       $('fact-text').style.display = 'none';
       $('fact-number').style.display = 'none';
+      $('vraag-wrap').style.display = 'none';
       document.querySelector('.buttons').style.display = 'none';
       document.querySelector('.hint').style.display = 'none';
       $('done-screen').style.display = 'flex';
@@ -1267,6 +1366,58 @@
       cardEl.style.transform = '';
       setTimeout(() => { cardEl.style.transition = ''; }, 460);
     });
+
+    // ── Wikipedia vraag ────────────────────────────────
+    async function vraagStellen() {
+      const input = $('vraag-input');
+      const btn   = $('btn-vraag');
+      const ant   = $('antwoord');
+      const vraag = input.value.trim();
+      if (!vraag) return;
+
+      btn.disabled = true;
+      ant.className = 'antwoord laden';
+      ant.textContent = 'Zoeken op Wikipedia...';
+
+      try {
+        // Zoek op NL Wikipedia, val terug op EN
+        let extract = await zoekWiki('nl', vraag) || await zoekWiki('en', vraag);
+        if (!extract) throw new Error('niets gevonden');
+
+        // Maximaal 2 zinnen
+        const zinnen = extract.match(/[^.!?]+[.!?]+[\s]*/g) || [];
+        const kort = zinnen.slice(0, 2).join('').trim();
+
+        ant.className = 'antwoord zichtbaar';
+        ant.textContent = kort || extract.slice(0, 220);
+      } catch (_) {
+        ant.className = 'antwoord fout';
+        ant.textContent = 'Geen Wikipedia-resultaat gevonden voor deze vraag.';
+      }
+
+      btn.disabled = false;
+    }
+
+    async function zoekWiki(lang, vraag) {
+      const base = `https://${lang}.wikipedia.org`;
+      const searchUrl = `${base}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(vraag)}&utf8=&format=json&origin=*&srlimit=1`;
+      const s = await fetch(searchUrl).then(r => r.json());
+      const resultaat = s.query?.search?.[0];
+      if (!resultaat) return null;
+
+      const titel = encodeURIComponent(resultaat.title);
+      const sum = await fetch(`${base}/api/rest_v1/page/summary/${titel}`).then(r => r.json());
+      return sum.extract || null;
+    }
+
+    // Druk Enter in het veld
+    $('vraag-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); vraagStellen(); }
+    });
+    $('btn-vraag').addEventListener('click', vraagStellen);
+
+    // Voorkom dat klikken in het invoerveld de swipe activeert
+    $('vraag-wrap').addEventListener('pointerdown', e => e.stopPropagation());
 
     // ── Log ────────────────────────────────────────────
     function updateLog() {
