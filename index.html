@@ -689,6 +689,29 @@
       align-items: flex-start;
     }
     .bookmark-item::before { content: '★'; color: rgba(255,204,34,0.45); flex-shrink: 0; }
+    .bookmark-item.verborgen { display: none; }
+    .bm-zoek {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem; font-weight: 600;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,204,34,0.18);
+      border-radius: 9px;
+      color: rgba(255,255,255,0.7);
+      padding: 5px 11px;
+      outline: none;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .bm-zoek::placeholder { color: rgba(255,255,255,0.22); }
+    .bm-zoek:focus { border-color: rgba(255,204,34,0.38); }
+    .bm-count { font-family:'VT323',monospace; font-size:0.95rem; color:rgba(255,204,34,0.35); }
+    .bm-clear {
+      font-family: 'Rajdhani', sans-serif; font-size:0.78rem; font-weight:700;
+      background:none; border:1px solid rgba(255,80,80,0.2); border-radius:7px;
+      color:rgba(255,80,80,0.4); padding:2px 9px; cursor:pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .bm-clear:hover { color:rgba(255,100,100,0.7); border-color:rgba(255,80,80,0.45); }
 
     /* ── Done screen ── */
     .done-screen {
@@ -1157,7 +1180,12 @@
   <div class="bookmarks-section" id="bookmarks-section">
     <div class="bookmarks-header">
       <h2>★ OPGESLAGEN</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="bm-count" id="bm-count"></span>
+        <button class="bm-clear" id="bm-clear" onclick="clearBookmarks()">✕ wis alles</button>
+      </div>
     </div>
+    <input class="bm-zoek" id="bm-zoek" type="text" placeholder="Zoek in opgeslagen feiten..." oninput="filterBookmarks()" />
     <div class="bookmark-box" id="bookmarks-box">
       <span class="bookmarks-leeg">Nog niets opgeslagen...</span>
     </div>
@@ -2313,13 +2341,42 @@
     }
 
     function updateBookmarks() {
-      const box = $('bookmarks-box');
+      const box  = $('bookmarks-box');
+      const zoek = $('bm-zoek');
+      const teller = $('bm-count');
+      const clearBtn = $('bm-clear');
       if (bookmarks.length === 0) {
         box.innerHTML = '<span class="bookmarks-leeg">Nog niets opgeslagen...</span>';
+        zoek.style.display = 'none';
+        teller.textContent = '';
+        clearBtn.style.display = 'none';
         return;
       }
+      zoek.style.display = '';
+      clearBtn.style.display = '';
+      teller.textContent = `${bookmarks.length}`;
       const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      box.innerHTML = bookmarks.map(f => `<div class="bookmark-item">${esc(f)}</div>`).join('');
+      box.innerHTML = bookmarks.map((f, i) =>
+        `<div class="bookmark-item" data-idx="${i}">${esc(f)}</div>`
+      ).join('');
+      filterBookmarks();
+    }
+
+    function filterBookmarks() {
+      const q = ($('bm-zoek').value || '').toLowerCase();
+      document.querySelectorAll('#bookmarks-box .bookmark-item').forEach(el => {
+        el.classList.toggle('verborgen', q.length > 0 && !el.textContent.toLowerCase().includes(q));
+      });
+    }
+
+    function clearBookmarks() {
+      if (!confirm('Alle opgeslagen feiten verwijderen?')) return;
+      bookmarks = [];
+      try { localStorage.removeItem(BM_KEY); } catch(_) {}
+      updateBookmarks();
+      if (huidigIndex < volgorde.length) {
+        $('btn-bm').classList.remove('actief');
+      }
     }
 
     // ── Particles ─────────────────────────────────────
