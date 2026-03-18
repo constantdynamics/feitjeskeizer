@@ -584,6 +584,69 @@
       background: rgba(255,0,0,0.05);
       border-left-color: rgba(255,80,80,0.35);
     }
+
+    /* API-sleutel instelling */
+    .api-section {
+      max-width: 480px;
+      margin: 0 auto 32px;
+      padding: 0 16px;
+    }
+    .api-toggle {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.3);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      padding: 4px 0;
+      text-transform: uppercase;
+    }
+    .api-toggle:hover { color: rgba(255,255,255,0.55); }
+    .api-fields {
+      display: none;
+      margin-top: 10px;
+      gap: 8px;
+      flex-direction: column;
+    }
+    .api-fields.open { display: flex; }
+    .api-fields label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.06em;
+    }
+    .api-fields input {
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(204,68,255,0.28);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 0.82rem;
+    }
+    .api-fields input:focus { outline: none; border-color: rgba(204,68,255,0.6); }
+    .api-save {
+      align-self: flex-start;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      letter-spacing: 0.1em;
+      padding: 8px 18px;
+      cursor: pointer;
+    }
+    .api-status {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.78rem;
+      color: rgba(100,255,160,0.7);
+      letter-spacing: 0.06em;
+    }
   </style>
 </head>
 <body>
@@ -642,6 +705,18 @@
         </div>
         <p>Kopieer de log en geef die aan AI voor een nieuwe set feitjes op maat.</p>
         <button class="btn-restart" onclick="restart()">↺ OPNIEUW</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="api-section">
+    <button class="api-toggle" onclick="toggleApiFields()">⚙ Claude API-sleutel</button>
+    <div class="api-fields" id="api-fields">
+      <label>Plak hier je Anthropic API-sleutel (wordt lokaal opgeslagen):</label>
+      <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="api-save" onclick="slaApiOp()">Opslaan</button>
+        <span class="api-status" id="api-status"></span>
       </div>
     </div>
   </div>
@@ -1350,7 +1425,28 @@
       setTimeout(() => { cardEl.style.transition = ''; }, 460);
     });
 
-    // ── Wikipedia vraag ────────────────────────────────
+    // ── API-sleutel beheer ──────────────────────────────
+    function getApiKey() { return localStorage.getItem('anthropic_api_key') || ''; }
+
+    function slaApiOp() {
+      const key = $('api-key-input').value.trim();
+      if (key) {
+        localStorage.setItem('anthropic_api_key', key);
+        $('api-status').textContent = '✓ Opgeslagen';
+      } else {
+        localStorage.removeItem('anthropic_api_key');
+        $('api-status').textContent = 'Verwijderd';
+      }
+      setTimeout(() => { $('api-status').textContent = ''; }, 2500);
+    }
+
+    function toggleApiFields() {
+      const f = $('api-fields');
+      f.classList.toggle('open');
+      if (f.classList.contains('open')) $('api-key-input').value = getApiKey();
+    }
+
+    // ── Vraag beantwoorden ──────────────────────────────
     async function vraagStellen() {
       const input = $('vraag-input');
       const btn   = $('btn-vraag');
@@ -1358,50 +1454,67 @@
       const vraag = input.value.trim();
       if (!vraag) return;
 
+      const feitTekst = feiten[volgorde[huidigIndex]];
       btn.disabled = true;
-      ant.className = 'antwoord laden';
-      ant.textContent = 'Zoeken op Wikipedia...';
+      const apiKey = getApiKey();
 
-      try {
-        const feitTekst = feiten[volgorde[huidigIndex]];
-
-        // Haal het onderwerp uit het feit:
-        // 1) eerste geciteerde term  'kangaroo' / "kangaroo"
-        // 2) eerste eigennaam (hoofdletter midden in zin)
-        // 3) eerste 2 woorden als fallback
-        const geciteerd = feitTekst.match(/['"'"]([^'"'"]+)['"'"]/);
-        const eigenNaam = feitTekst.match(/(?<!\.\s)(?:^|\s)([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüý]{2,})/g);
-        const onderwerp = geciteerd
-          ? geciteerd[1]
-          : eigenNaam?.length
-            ? eigenNaam[0].trim()
+      if (apiKey) {
+        ant.className = 'antwoord laden';
+        ant.textContent = 'Claude denkt na...';
+        try {
+          const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 200,
+              messages: [{ role: 'user', content:
+                `Feit: "${feitTekst}"\n\nVraag: ${vraag}\n\nGeef een kort, direct antwoord van maximaal 3 zinnen. Geen inleiding, geen herhaling van het feit.`
+              }]
+            })
+          });
+          if (!res.ok) throw new Error(`API fout ${res.status}`);
+          const data = await res.json();
+          ant.className = 'antwoord zichtbaar';
+          ant.textContent = data.content[0].text.trim();
+        } catch (err) {
+          ant.className = 'antwoord fout';
+          ant.textContent = `Claude-fout: ${err.message}`;
+        }
+      } else {
+        // Wikipedia fallback
+        ant.className = 'antwoord laden';
+        ant.textContent = 'Zoeken op Wikipedia...';
+        try {
+          const geciteerd = feitTekst.match(/['"'"]([^'"'"]+)['"'"]/);
+          const eigenNaam = feitTekst.match(/(?:^|\s)([A-Z][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüý]{2,})/g);
+          const onderwerp = geciteerd ? geciteerd[1]
+            : eigenNaam?.length ? eigenNaam[0].trim()
             : feitTekst.split(/\s+/).slice(0, 2).join(' ');
 
-        // Zoek Wikipedia: onderwerp alleen, dan onderwerp+vraag, dan alleen vraag
-        let extract = await zoekWiki('nl', onderwerp)
-                   || await zoekWiki('en', onderwerp)
-                   || await zoekWiki('nl', `${onderwerp} ${vraag}`)
-                   || await zoekWiki('en', `${onderwerp} ${vraag}`)
-                   || await zoekWiki('nl', vraag)
-                   || await zoekWiki('en', vraag);
-        if (!extract) throw new Error('niets gevonden');
+          let extract = await zoekWiki('nl', onderwerp) || await zoekWiki('en', onderwerp)
+                     || await zoekWiki('nl', vraag) || await zoekWiki('en', vraag);
+          if (!extract) throw new Error('niets gevonden');
 
-        // Zoek de meest relevante zinnen op basis van vraagwoorden
-        const zinnen = extract.match(/[^.!?\n]{15,}[.!?]/g) || [];
-        const zoekWoorden = [...vraag.toLowerCase().split(/\s+/),
-                             ...feitTekst.toLowerCase().split(/\s+/)]
-          .filter(w => w.length > 4);
-        const gescoord = zinnen.map(z => ({
-          zin: z.trim(),
-          score: zoekWoorden.filter(w => z.toLowerCase().includes(w)).length
-        })).sort((a, b) => b.score - a.score);
+          const zinnen = extract.match(/[^.!?\n]{15,}[.!?]/g) || [];
+          const woorden = [...vraag.toLowerCase().split(/\s+/), ...feitTekst.toLowerCase().split(/\s+/)]
+            .filter(w => w.length > 4);
+          const top = zinnen
+            .map(z => ({ z: z.trim(), s: woorden.filter(w => z.toLowerCase().includes(w)).length }))
+            .sort((a, b) => b.s - a.s).slice(0, 3).map(x => x.z).join(' ').trim();
 
-        const top = gescoord.slice(0, 3).map(z => z.zin).join(' ').trim();
-        ant.className = 'antwoord zichtbaar';
-        ant.textContent = top || zinnen.slice(0, 3).join(' ').trim() || extract.slice(0, 300);
-      } catch (_) {
-        ant.className = 'antwoord fout';
-        ant.textContent = 'Geen Wikipedia-resultaat gevonden voor deze vraag.';
+          ant.className = 'antwoord zichtbaar';
+          ant.textContent = (top || zinnen.slice(0, 3).join(' ').trim() || extract.slice(0, 300))
+            + '\n\n💡 Voeg een Claude API-sleutel toe onderaan voor betere antwoorden.';
+        } catch (_) {
+          ant.className = 'antwoord fout';
+          ant.textContent = 'Geen resultaat gevonden. Voeg onderaan een Claude API-sleutel toe voor directe antwoorden.';
+        }
       }
 
       btn.disabled = false;
