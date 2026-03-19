@@ -1715,7 +1715,10 @@
     let fontStep = 2; // default = index 2 → 1.6rem
     const $ = id => document.getElementById(id);
     try { bookmarks = JSON.parse(localStorage.getItem(BM_KEY) || '[]'); } catch(_) {}
-    try { fontStep = parseInt(localStorage.getItem(FONTSIZE_KEY) ?? '2', 10); } catch(_) {}
+    try {
+      const saved = parseInt(localStorage.getItem(FONTSIZE_KEY) ?? '2', 10);
+      if (!isNaN(saved)) fontStep = Math.max(0, Math.min(FONT_STEPS.length - 1, saved));
+    } catch(_) {}
 
     function setFontSize(delta) {
       fontStep = Math.max(0, Math.min(FONT_STEPS.length - 1, fontStep + delta));
@@ -1739,7 +1742,9 @@
     function loadSavedState() {
       try {
         const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (s && Array.isArray(s.volgorde) && s.volgorde.length > 0 && typeof s.huidigIndex === 'number') return s;
+        if (s && Array.isArray(s.volgorde) && s.volgorde.length > 0 &&
+            typeof s.huidigIndex === 'number' && s.huidigIndex >= 0 &&
+            s.huidigIndex <= s.volgorde.length && Array.isArray(s.log)) return s;
       } catch(e) {}
       return null;
     }
@@ -1821,6 +1826,7 @@
 
     function loadFeit() {
       const feitTekst = feiten[volgorde[huidigIndex]];
+      if (!feitTekst) return;
       $('fact-text').innerHTML = linkify(feitTekst);
       $('fact-number').textContent = `FEIT ${huidigIndex + 1} / ${volgorde.length}`;
 
@@ -2249,8 +2255,9 @@
       const titel = encodeURIComponent(resultaat.title);
       const extractUrl = `${base}/w/api.php?action=query&prop=extracts&exsentences=30&explaintext=1&titles=${titel}&format=json&origin=*`;
       const e = await fetch(extractUrl).then(r => r.json());
-      const pages = e.query?.pages;
-      const page = pages?.[Object.keys(pages)[0]];
+      const pages = e.query?.pages || {};
+      const pageId = Object.keys(pages)[0];
+      const page = pageId ? pages[pageId] : null;
       return page?.extract || null;
     }
 
@@ -2493,7 +2500,12 @@
         let tekst = data.content[0].text.trim();
         const m = tekst.match(/\{[\s\S]*\}/);
         if (m) tekst = m[0];
-        const parsed = JSON.parse(tekst);
+        let parsed;
+        try { parsed = JSON.parse(tekst); } catch(_) {
+          $('quiz-vraag').innerHTML = `<span style="color:rgba(255,110,110,0.8)">Quiz-gegevens ongeldig, probeer opnieuw</span>`;
+          btn.disabled = false;
+          return;
+        }
         $('quiz-vraag').textContent = parsed.v;
         const shuffled = (parsed.o || [])
           .map((o, i) => ({ o, juist: i === (parsed.c ?? 0) }))
@@ -2612,8 +2624,8 @@
 
     // ── Dagelijks feit ─────────────────────────────────
     function dagelijksFeit() {
-      const nu   = new Date();
-      const dag  = Math.floor(nu.getTime() / 86400000); // epochdag
+      const nu  = new Date();
+      const dag = Math.floor(Date.UTC(nu.getUTCFullYear(), nu.getUTCMonth(), nu.getUTCDate()) / 86400000); // UTC epochdag
       const idx  = dag % feiten.length;
       const tekst = feiten[idx];
       $('dagelijks-tekst').textContent = tekst;
