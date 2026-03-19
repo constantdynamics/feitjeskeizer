@@ -1,0 +1,2657 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feitjeskeizer</title>
+  <meta name="theme-color" content="#06000d">
+  <meta name="description" content="Swipe door verrassende feiten — de Tinder voor kennis">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Feitjeskeizer">
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Rajdhani:wght@500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:   #ff0099;
+      --violet: #cc44ff;
+      --purple: #9900ee;
+      --rose:   #ff88cc;
+      --bg:     #06000d;
+      --card:   rgba(16, 4, 44, 0.92);
+    }
+
+    body {
+      min-height: 100dvh;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 90% 55% at 50% -5%, #2a0060 0%, transparent 65%),
+        radial-gradient(ellipse 40% 30% at 90% 110%, #1a003a 0%, transparent 60%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+      padding: 20px 16px 80px;
+    }
+
+    /* Grid floor */
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: 0; left: -30%; right: -30%;
+      height: 52vh;
+      background-image:
+        linear-gradient(rgba(204,68,255,0.25) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,0,153,0.18) 1px, transparent 1px);
+      background-size: 50px 50px;
+      transform: perspective(380px) rotateX(72deg);
+      transform-origin: bottom;
+      pointer-events: none;
+      z-index: 0;
+      animation: gridScroll 5s linear infinite;
+      mask-image: linear-gradient(to top, black 0%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+    }
+    @keyframes gridScroll {
+      from { background-position: 0 0; }
+      to   { background-position: 0 50px; }
+    }
+
+    /* CRT scanlines on whole page */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom, transparent 0px, transparent 3px,
+        rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+      animation: flicker 9s infinite;
+    }
+    @keyframes flicker {
+      0%,93%,100% { opacity: 1; }
+      94% { opacity: 0.94; }
+      95% { opacity: 1; }
+      97% { opacity: 0.88; }
+      98% { opacity: 1; }
+    }
+
+    /* ── Dagelijks feit ── */
+    @keyframes bannerPulse {
+      0%,100% { box-shadow: 0 0 0px rgba(255,204,34,0);     border-color: rgba(255,204,34,0.2); }
+      50%      { box-shadow: 0 0 18px rgba(255,204,34,0.18); border-color: rgba(255,204,34,0.42); }
+    }
+    .dagelijks-banner {
+      max-width: 540px; width: 100%;
+      position: relative; z-index: 2;
+      background: rgba(255,204,34,0.05);
+      border: 1px solid rgba(255,204,34,0.2);
+      border-radius: 14px;
+      padding: 10px 16px 12px;
+      margin-bottom: 6px;
+      cursor: default;
+      animation: bannerPulse 3.5s ease-in-out infinite;
+    }
+    .dagelijks-kop {
+      font-family: 'VT323', monospace;
+      font-size: 0.88rem; letter-spacing: 0.18em;
+      color: rgba(255,204,34,0.5);
+      margin-bottom: 4px;
+    }
+    .dagelijks-tekst {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem; font-weight: 600; line-height: 1.5;
+      color: rgba(255,230,120,0.82);
+    }
+    .dagelijks-cat {
+      display: inline-block; margin-top: 6px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      padding: 1px 8px; border-radius: 20px;
+      border: 1px solid rgba(255,204,34,0.25);
+      color: rgba(255,204,34,0.6);
+      background: rgba(255,204,34,0.07);
+    }
+
+    /* ── Header ── */
+    .header {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(3rem, 12vw, 6rem);
+      letter-spacing: -0.01em;
+      background: linear-gradient(90deg,
+        var(--pink)   0%,
+        var(--violet) 40%,
+        var(--pink)   65%,
+        var(--violet) 100%);
+      background-size: 250% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter:
+        drop-shadow(0 0 8px rgba(255,0,153,0.9))
+        drop-shadow(0 0 24px rgba(204,68,255,0.6))
+        drop-shadow(0 0 50px rgba(153,0,238,0.35));
+      line-height: 1.15;
+      animation: titleShift 4s linear infinite;
+    }
+    @keyframes titleShift {
+      from { background-position: 0% center; }
+      to   { background-position: 250% center; }
+    }
+    /* Brush stroke underline */
+    .header-brush {
+      display: block;
+      width: min(380px, 96%);
+      height: 16px;
+      margin: -6px auto 4px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 22'%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='0'%3E%3Cstop offset='0%25' stop-color='%23ff0099'/%3E%3Cstop offset='50%25' stop-color='%23cc44ff'/%3E%3Cstop offset='100%25' stop-color='%23ff0099'/%3E%3C/linearGradient%3E%3Cpath d='M6,15 C25,7 65,18 110,11 C155,5 200,17 250,11 C290,6 335,16 394,12' stroke='url(%23g)' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3Cpath d='M40,17 C80,13 130,18 180,14 C230,10 280,17 340,14' stroke='%23cc44ff' stroke-width='3' fill='none' stroke-linecap='round' opacity='0.5'/%3E%3C/svg%3E") no-repeat center/100% 100%;
+      filter:
+        drop-shadow(0 0 6px rgba(255,0,153,0.9))
+        drop-shadow(0 0 18px rgba(204,68,255,0.6));
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.4em;
+      color: rgba(204,68,255,0.6);
+      margin-top: 8px;
+      font-family: 'Rajdhani', sans-serif;
+      text-shadow: 0 0 12px rgba(204,68,255,0.4);
+    }
+
+    /* ── Restore banner ── */
+    .restore-banner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 540px;
+      background: rgba(204,68,255,0.05);
+      border: 1px solid rgba(204,68,255,0.22);
+      border-radius: 14px;
+      padding: 11px 16px;
+      margin-bottom: 12px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .restore-banner p {
+      font-size: 0.82rem;
+      color: rgba(204,68,255,0.75);
+      letter-spacing: 0.04em;
+    }
+    .restore-btns { display: flex; gap: 8px; flex-shrink: 0; }
+    .restore-btns button {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 5px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s;
+      border: 1px solid;
+    }
+    .restore-btns button:active { transform: scale(0.93); }
+    .btn-continue {
+      background: rgba(204,68,255,0.15);
+      color: var(--violet);
+      border-color: rgba(204,68,255,0.35) !important;
+    }
+    .btn-fresh {
+      background: transparent;
+      color: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.12) !important;
+    }
+
+    /* ── Counters ── */
+    .counters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .counter {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      padding: 6px 20px;
+      border-radius: 20px;
+      border: 1px solid;
+      min-width: 88px;
+      text-align: center;
+      transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .counter.likes { color: var(--pink);   border-color: rgba(255,0,153,0.35);  background: rgba(255,0,153,0.08); }
+    .counter.skips { color: var(--violet);   border-color: rgba(204,68,255,0.22);   background: rgba(204,68,255,0.05); }
+    .counter.bump  { transform: scale(1.3); }
+
+    /* ── Progress bar ── */
+    .progress-bar-wrap {
+      width: 100%;
+      max-width: 540px;
+      height: 22px;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 14px;
+      overflow: visible;
+    }
+    .progress-bar-wrap::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+    }
+    .progress-bar-fill {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--violet), var(--pink), var(--purple));
+      border-radius: 3px;
+      transition: width 0.45s cubic-bezier(.4,0,.2,1);
+      overflow: hidden;
+    }
+    .progress-bar-fill::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+      animation: shimmer 2.5s infinite;
+    }
+    @keyframes shimmer {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(300%); }
+    }
+    #progress-label {
+      position: absolute;
+      right: 0; top: 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.28);
+      line-height: 1;
+    }
+
+    /* ── Card stack ── */
+    .card-wrap {
+      position: relative;
+      max-width: 540px;
+      width: 100%;
+      z-index: 2;
+      margin-bottom: 20px;
+      perspective: 1000px;
+    }
+    .card-wrap::before,
+    .card-wrap::after {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(204,68,255,0.18);
+      pointer-events: none;
+    }
+    .card-wrap::before { transform: rotate(-1.8deg) translateY(8px) scale(0.98); z-index: -2; }
+    .card-wrap::after  { transform: rotate(1.2deg)  translateY(4px) scale(0.99); z-index: -1; }
+
+    /* Main card */
+    .card {
+      position: relative;
+      width: 100%;
+      min-height: 310px;
+      padding: 28px 28px 22px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: linear-gradient(148deg, rgba(22,6,58,0.76) 0%, rgba(8,2,24,0.84) 100%);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(204,68,255,0.22);
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.4),
+        0 12px 48px rgba(0,0,0,0.55),
+        0 0 60px rgba(153,0,238,0.08),
+        3px 6px 0 rgba(0,0,0,0.22),
+        5px 12px 0 rgba(0,0,0,0.13),
+        7px 18px 0 rgba(0,0,0,0.07),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: box-shadow 0.08s linear, border-color 0.08s linear;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      will-change: transform;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y;
+    }
+    .card:active { cursor: grabbing; }
+
+    /* Hover glow in categoriekl­eur */
+    .card {
+      --cat-glow: rgba(153,68,255,0.12);
+    }
+    .card:hover {
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.4),
+        0 12px 48px rgba(0,0,0,0.55),
+        0 0 60px rgba(153,0,238,0.08),
+        3px 6px 0 rgba(0,0,0,0.22),
+        5px 12px 0 rgba(0,0,0,0.13),
+        7px 18px 0 rgba(0,0,0,0.07),
+        0 0 38px var(--cat-glow),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* Animated gradient border */
+    @property --bdeg { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+    @keyframes rotateBorder { to { --bdeg: 360deg; } }
+    .card-border-glow {
+      position: absolute;
+      inset: -1px;
+      border-radius: 21px;
+      z-index: -3;
+      background: conic-gradient(from var(--bdeg),
+        rgba(153,68,255,0.55), rgba(255,0,153,0.55),
+        rgba(0,200,255,0.45), rgba(0,232,136,0.4),
+        rgba(255,204,34,0.4), rgba(153,68,255,0.55));
+      animation: rotateBorder 9s linear infinite;
+    }
+
+    /* Noise texture overlay */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Card shine */
+    .card-shine {
+      position: absolute; inset: 0;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 45%);
+      pointer-events: none;
+    }
+
+    /* Overlays — verborgen, glow wordt via JS op .card gezet */
+    .card-overlay { display: none; }
+
+    /* Animations */
+    @keyframes flyRight {
+      0%   { transform: translateX(0) rotate(0deg) translateY(0); opacity: 1; }
+      100% { transform: translateX(140%) rotate(26deg) translateY(55px); opacity: 0; }
+    }
+    @keyframes flyLeft {
+      0%   { transform: translateX(0) rotate(0deg) translateY(0); opacity: 1; }
+      100% { transform: translateX(-140%) rotate(-26deg) translateY(55px); opacity: 0; }
+    }
+    .card.fly-right { animation: flyRight 0.38s cubic-bezier(.45,0,.9,.6) forwards; }
+    .card.fly-left  { animation: flyLeft  0.38s cubic-bezier(.45,0,.9,.6) forwards; }
+
+    @keyframes cardIn {
+      0%   { transform: scale(0.84) translateY(32px); opacity: 0; }
+      55%  { transform: scale(1.05) translateY(-5px); opacity: 1; }
+      75%  { transform: scale(0.98) translateY(2px); }
+      100% { transform: scale(1)   translateY(0); }
+    }
+    .card.card-in { animation: cardIn 0.44s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+    /* Kaart ademt */
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.0028); }
+    }
+    .card-wrap.breathing { animation: breathe 4.5s ease-in-out infinite; }
+
+    /* Stack depth advance */
+    .card-wrap::before,
+    .card-wrap::after  { transition: transform 0.32s cubic-bezier(.4,0,.2,1); }
+    .card-wrap.stack-advance::before { transform: rotate(-0.8deg) translateY(3px) scale(0.992); }
+    .card-wrap.stack-advance::after  { transform: rotate(0.5deg)  translateY(1px) scale(0.997); }
+
+    /* Morph-in: tekst verschijnt iets later dan de kaart */
+    @keyframes textIn {
+      from { opacity: 0; transform: translateY(9px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card.card-in .fact-text { animation: textIn 0.32s ease 0.14s both; }
+
+    /* Inline wiki chips */
+    .wiki-chip {
+      border-bottom: 1px dotted rgba(100,180,255,0.45);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .wiki-chip:hover { color: rgba(140,210,255,0.95); }
+
+    /* Wiki tooltip */
+    .wiki-tooltip {
+      position: fixed;
+      max-width: 300px;
+      background: rgba(8,2,28,0.97);
+      border: 1px solid rgba(80,160,255,0.28);
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.5;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+      z-index: 9998;
+      backdrop-filter: blur(18px);
+      display: none;
+    }
+    .wiki-tooltip-title {
+      font-size: 0.92rem; font-weight: 700;
+      color: rgba(100,195,255,0.9);
+      margin-bottom: 5px;
+    }
+    .wiki-tooltip-link {
+      display: block; margin-top: 8px;
+      font-size: 0.78rem; color: rgba(80,160,255,0.6);
+      text-decoration: none;
+    }
+    .wiki-tooltip-link:hover { color: rgba(100,195,255,0.9); }
+
+    /* Fact meta: jaar + bron */
+    .fact-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-top: -6px;
+    }
+    .jaar-badge {
+      font-family: 'VT323', monospace;
+      font-size: 0.9rem;
+      color: rgba(255,204,34,0.5);
+      letter-spacing: 0.08em;
+    }
+    .bron-label {
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.16);
+    }
+    .rel-counter {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.22);
+      white-space: nowrap;
+    }
+    .btn-font {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.82rem; font-weight: 700;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 7px;
+      color: rgba(255,255,255,0.35);
+      padding: 2px 7px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s, border-color 0.15s;
+      line-height: 1.5;
+    }
+    .btn-font:hover { color: rgba(255,255,255,0.65); border-color: rgba(255,255,255,0.28); }
+    .antwoord-bron {
+      display: block; margin-top: 6px;
+      font-size: 0.78rem; font-weight: 600;
+      color: rgba(80,160,255,0.6);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .antwoord-bron:hover { color: rgba(100,195,255,0.9); }
+
+    /* Card content */
+    .fact-number {
+      font-family: 'VT323', monospace;
+      font-size: 1.1rem;
+      letter-spacing: 0.25em;
+      color: rgba(204,68,255,0.5);
+    }
+    .fact-text {
+      font-size: var(--fact-size, 1.6rem);
+      font-weight: 600;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.95);
+      flex: 1;
+      letter-spacing: 0.01em;
+      transition: font-size 0.18s ease;
+    }
+
+    /* ── Buttons ── */
+    .buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .buttons button {
+      flex: 1;
+      padding: 15px 0;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      cursor: pointer;
+      transition: transform 0.12s cubic-bezier(.34,1.56,.64,1), box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    .buttons button::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.1s;
+    }
+    .buttons button:active::after { background: rgba(255,255,255,0.1); }
+    .buttons button:active { transform: scale(0.91) !important; }
+
+    .btn-like {
+      background: linear-gradient(135deg, #ff0099 0%, #cc44ff 60%, #9900ee 100%);
+      color: #fff;
+      box-shadow:
+        0 4px 22px rgba(255,0,153,0.45),
+        0 4px 22px rgba(153,0,238,0.25);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .btn-like:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 8px 32px rgba(255,0,153,0.6),
+        0 8px 32px rgba(153,0,238,0.4);
+    }
+    .btn-dislike {
+      background: rgba(204,68,255,0.08);
+      color: rgba(204,68,255,0.85);
+      border: 1px solid rgba(204,68,255,0.32);
+      box-shadow:
+        0 4px 16px rgba(0,0,0,0.28),
+        inset 0 1px 0 rgba(204,68,255,0.1);
+    }
+    .btn-dislike:hover {
+      transform: translateY(-3px);
+      background: rgba(204,68,255,0.14);
+      border-color: rgba(204,68,255,0.55);
+      box-shadow:
+        0 8px 28px rgba(204,68,255,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .hint {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .hint-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      color: rgba(255,255,255,0.2);
+      text-align: center;
+      flex: 1;
+    }
+    .btn-undo, .btn-bm, .btn-export-card {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.22);
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-undo:hover  { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.25); }
+    .btn-bm          { font-size: 1.05rem; }
+    .btn-bm.actief   { color: #ffcc22; border-color: rgba(255,204,34,0.45); }
+    .btn-bm:hover    { color: #ffcc22; border-color: rgba(255,204,34,0.35); }
+    .btn-export-card { font-size: 0.95rem; }
+    .btn-export-card:hover { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.25); }
+
+    /* ── Quiz ── */
+    .quiz-toggle {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: 3px 9px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,204,34,0.28);
+      background: rgba(255,204,34,0.05);
+      color: rgba(255,204,34,0.55);
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quiz-toggle:hover    { background: rgba(255,204,34,0.12); color: rgba(255,204,34,0.9); }
+    .quiz-toggle:disabled { opacity: 0.4; cursor: default; }
+    .quiz-container {
+      display: none;
+      flex-direction: column;
+      gap: 9px;
+      padding: 10px 0 2px;
+    }
+    .quiz-container.open { display: flex; }
+    .quiz-vraag {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: rgba(255,220,80,0.9);
+      letter-spacing: 0.02em;
+      line-height: 1.45;
+    }
+    .quiz-opties { display: flex; flex-direction: column; gap: 6px; }
+    .quiz-optie {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 9px;
+      color: rgba(255,255,255,0.72);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 13px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.12s, border-color 0.12s;
+      letter-spacing: 0.02em;
+    }
+    .quiz-optie:hover:not(:disabled) { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+    .quiz-optie.correct { background: rgba(0,232,136,0.13); border-color: rgba(0,232,136,0.48); color: #00e888; }
+    .quiz-optie.fout    { background: rgba(255,80,80,0.09);  border-color: rgba(255,80,80,0.32);  color: rgba(255,110,110,0.9); }
+    .quiz-optie:disabled { cursor: default; }
+    .quiz-laden { font-size: 0.82rem; color: rgba(255,255,255,0.28); font-style: italic; }
+
+    /* ── Particles ── */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      animation: floatUp 1.3s ease-out forwards;
+      z-index: 9999;
+      user-select: none;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0)      scale(1)   rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(-130px) scale(0.3) rotate(25deg);  opacity: 0; }
+    }
+
+    /* ── Bookmarks sectie ── */
+    .bookmarks-section {
+      max-width: 540px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+      margin-top: 12px;
+    }
+    .bookmarks-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .bookmarks-section h2 {
+      font-family: 'VT323', monospace;
+      color: rgba(255,204,34,0.5);
+      font-size: 1.6rem;
+      letter-spacing: 0.2em;
+    }
+    .bookmark-box {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,204,34,0.1);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      max-height: 190px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,204,34,0.18) transparent;
+    }
+    .bookmarks-leeg {
+      font-family: 'VT323', monospace;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.14);
+      font-style: italic;
+    }
+    .bookmark-item {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: rgba(255,220,80,0.8);
+      line-height: 1.45;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .bookmark-item::before { content: '★'; color: rgba(255,204,34,0.45); flex-shrink: 0; }
+    .bookmark-item.verborgen { display: none; }
+    .bm-zoek {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem; font-weight: 600;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,204,34,0.18);
+      border-radius: 9px;
+      color: rgba(255,255,255,0.7);
+      padding: 5px 11px;
+      outline: none;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .bm-zoek::placeholder { color: rgba(255,255,255,0.22); }
+    .bm-zoek:focus { border-color: rgba(255,204,34,0.38); }
+    .bm-count { font-family:'VT323',monospace; font-size:0.95rem; color:rgba(255,204,34,0.35); }
+    .bm-clear {
+      font-family: 'Rajdhani', sans-serif; font-size:0.78rem; font-weight:700;
+      background:none; border:1px solid rgba(255,80,80,0.2); border-radius:7px;
+      color:rgba(255,80,80,0.4); padding:2px 9px; cursor:pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .bm-clear:hover { color:rgba(255,100,100,0.7); border-color:rgba(255,80,80,0.45); }
+
+    /* ── Done screen ── */
+    .done-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      padding: 16px 0 8px;
+    }
+    .done-screen h2 {
+      font-family: 'VT323', monospace;
+      font-size: 3.4rem;
+      background: linear-gradient(90deg, var(--violet), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.18em;
+    }
+    .done-stats { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .done-stat {
+      padding: 9px 24px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+    }
+    .done-stat.liked   { background: rgba(255,0,153,0.12); color: var(--pink); border: 1px solid rgba(255,0,153,0.3); }
+    .done-stat.skipped { background: rgba(204,68,255,0.07);  color: var(--violet); border: 1px solid rgba(204,68,255,0.22); }
+    .done-screen > p {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      line-height: 1.55;
+      letter-spacing: 0.04em;
+    }
+    .btn-restart {
+      padding: 15px 40px;
+      background: linear-gradient(135deg, var(--purple), var(--pink), var(--violet));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      transition: transform 0.12s cubic-bezier(.34,1.56,.64,1), box-shadow 0.15s;
+      box-shadow: 0 4px 26px rgba(191,0,255,0.38);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-restart:hover { transform: translateY(-3px); box-shadow: 0 8px 36px rgba(191,0,255,0.55); }
+    .btn-restart:active { transform: scale(0.93) !important; }
+
+    /* ── Log section ── */
+    .log-section {
+      max-width: 540px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .log-section h2 {
+      font-family: 'VT323', monospace;
+      color: rgba(204,68,255,0.55);
+      font-size: 1.6rem;
+      letter-spacing: 0.2em;
+    }
+    .log-box {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: 'VT323', monospace;
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.5);
+      white-space: pre-wrap;
+      max-height: 220px;
+      overflow-y: auto;
+      line-height: 1.65;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(204,68,255,0.2) transparent;
+    }
+    .log-box::-webkit-scrollbar { width: 4px; }
+    .log-box::-webkit-scrollbar-thumb { background: rgba(204,68,255,0.2); border-radius: 2px; }
+    .log-empty { color: rgba(255,255,255,0.14); font-style: italic; }
+
+    .btn-copy {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: 5px 14px;
+      background: transparent;
+      color: rgba(204,68,255,0.45);
+      border: 1px solid rgba(204,68,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-copy:hover {
+      color: rgba(204,68,255,0.9);
+      border-color: rgba(204,68,255,0.42);
+      background: rgba(204,68,255,0.07);
+    }
+
+    /* ── Vraag-sectie ──────────────────────────────────── */
+    .vraag-wrap {
+      width: 100%;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .vraag-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    #vraag-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(204,68,255,0.28);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #vraag-input:focus {
+      border-color: rgba(204,68,255,0.65);
+      background: rgba(204,68,255,0.07);
+    }
+    #vraag-input::placeholder {
+      color: rgba(255,255,255,0.25);
+      font-style: italic;
+      font-weight: 500;
+    }
+    .btn-vraag {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      padding: 10px 18px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
+    .btn-vraag:hover { opacity: 0.88; }
+    .btn-vraag:active { transform: scale(0.95); }
+    .btn-vraag:disabled { opacity: 0.4; cursor: default; }
+    .antwoord {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 600;
+      line-height: 1.6;
+      color: rgba(180,120,255,0.95);
+      letter-spacing: 0.02em;
+      padding: 10px 14px;
+      background: rgba(204,68,255,0.07);
+      border-left: 3px solid rgba(204,68,255,0.4);
+      border-radius: 0 8px 8px 0;
+      display: none;
+    }
+    .antwoord.laden {
+      display: block;
+      color: rgba(255,255,255,0.3);
+      font-style: italic;
+      background: rgba(255,255,255,0.03);
+      border-left-color: rgba(255,255,255,0.12);
+    }
+    .antwoord.zichtbaar {
+      display: block;
+    }
+    .antwoord.fout {
+      display: block;
+      color: rgba(255,120,120,0.8);
+      background: rgba(255,0,0,0.05);
+      border-left-color: rgba(255,80,80,0.35);
+    }
+
+    /* ── Categorie badge ── */
+    .fact-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .cat-badge {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+
+    /* ── Vervolgvragen chips ── */
+    .vervolgvragen {
+      display: none;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 4px;
+    }
+    .vervolgvragen.zichtbaar { display: flex; }
+    .vv-chip {
+      background: rgba(204,68,255,0.07);
+      border: 1px solid rgba(204,68,255,0.28);
+      border-radius: 20px;
+      color: rgba(204,68,255,0.85);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: left;
+      line-height: 1.35;
+    }
+    .vv-chip:hover {
+      background: rgba(204,68,255,0.16);
+      border-color: rgba(204,68,255,0.55);
+      color: rgba(220,140,255,0.95);
+    }
+
+    /* ── Done: categorie-verdeling ── */
+    .done-cats {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .done-cat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .done-cat-label {
+      width: 96px;
+      flex-shrink: 0;
+      text-align: right;
+      font-size: 0.8rem;
+    }
+    .done-cat-bar-wrap {
+      flex: 1;
+      height: 7px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .done-cat-bar {
+      height: 100%;
+      border-radius: 4px;
+      width: 0;
+      transition: width 0.9s cubic-bezier(.4,0,.2,1);
+    }
+    .done-cat-count {
+      width: 22px;
+      text-align: right;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.8rem;
+    }
+    .done-suggestie {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      line-height: 1.6;
+      letter-spacing: 0.04em;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 12px;
+      width: 100%;
+    }
+
+    /* API-sleutel instelling */
+    .api-section {
+      max-width: 480px;
+      margin: 0 auto 32px;
+      padding: 0 16px;
+    }
+    .api-toggle {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.3);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      padding: 4px 0;
+      text-transform: uppercase;
+    }
+    .api-toggle:hover { color: rgba(255,255,255,0.55); }
+    .api-fields {
+      display: none;
+      margin-top: 10px;
+      gap: 8px;
+      flex-direction: column;
+    }
+    .api-fields.open { display: flex; }
+    .api-fields label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.06em;
+    }
+    .api-fields input {
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(204,68,255,0.28);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 0.82rem;
+    }
+    .api-fields input:focus { outline: none; border-color: rgba(204,68,255,0.6); }
+    .api-save {
+      align-self: flex-start;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      letter-spacing: 0.1em;
+      padding: 8px 18px;
+      cursor: pointer;
+    }
+    .api-status {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.78rem;
+      color: rgba(100,255,160,0.7);
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Feitjeskeizer</h1>
+    <div class="header-brush"></div>
+    <p class="subtitle">✦ SWIPE DOOR DE KENNIS ✦</p>
+  </div>
+
+  <div class="dagelijks-banner" id="dagelijks-banner">
+    <div class="dagelijks-kop">◈ FEIT VAN DE DAG</div>
+    <div class="dagelijks-tekst" id="dagelijks-tekst"></div>
+    <span class="dagelijks-cat" id="dagelijks-cat"></span>
+  </div>
+
+  <div class="restore-banner" id="restore-banner">
+    <p id="restore-text">Verder gaan?</p>
+    <div class="restore-btns">
+      <button class="btn-continue" id="btn-continue">Verder →</button>
+      <button class="btn-fresh"    id="btn-fresh">Opnieuw</button>
+    </div>
+  </div>
+
+  <div class="counters">
+    <span class="counter likes" id="cnt-likes">♥ 0</span>
+    <span class="counter skips" id="cnt-skips">✕ 0</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <span id="progress-label"></span>
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+
+  <div class="card-wrap">
+    <div class="card-border-glow"></div>
+    <div class="card" id="card">
+      <div class="card-shine"></div>
+      <div class="card-overlay like-flash" id="overlay-like">♥ LIKE</div>
+      <div class="card-overlay skip-flash" id="overlay-skip">✕ SKIP</div>
+      <div class="fact-header">
+        <div class="fact-number" id="fact-number"></div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <div class="cat-badge" id="cat-badge"></div>
+          <button class="quiz-toggle" id="quiz-toggle-btn" onclick="triggerQuiz()">⚡ QUIZ</button>
+        </div>
+      </div>
+      <div class="fact-text" id="fact-text"></div>
+      <div class="fact-meta" id="fact-meta">
+        <span class="jaar-badge" id="jaar-badge"></span>
+        <span class="rel-counter" id="rel-counter"></span>
+        <span class="bron-label" id="bron-label"></span>
+      </div>
+      <div class="quiz-container" id="quiz-container">
+        <div class="quiz-vraag" id="quiz-vraag"></div>
+        <div class="quiz-opties" id="quiz-opties"></div>
+      </div>
+
+      <div class="vraag-wrap" id="vraag-wrap">
+        <div class="vraag-input-row">
+          <input type="text" id="vraag-input" placeholder="Stel een verdiepende vraag..." autocomplete="off" />
+          <button class="btn-vraag" id="btn-vraag">→</button>
+        </div>
+        <div class="antwoord" id="antwoord"></div>
+        <div class="vervolgvragen" id="vervolgvragen"></div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn-dislike" onclick="react('dislike')">✕ SKIP</button>
+        <button class="btn-like"    onclick="react('like')">♥ LIKE</button>
+      </div>
+      <div class="hint">
+        <button class="btn-undo" onclick="undo()" title="Undo (Z)">↩</button>
+        <span class="hint-text">← SKIP &nbsp;·&nbsp; LIKE → &nbsp;·&nbsp; SLEEP</span>
+        <div style="display:flex;gap:5px;align-items:center">
+          <button class="btn-font" onclick="setFontSize(-1)" title="Kleinere tekst">A−</button>
+          <button class="btn-font" onclick="setFontSize(+1)" title="Grotere tekst">A+</button>
+          <button class="btn-bm" id="btn-bm" onclick="toggleBookmark()" title="Opslaan (B)">★</button>
+          <button class="btn-export-card" onclick="exportKaart()" title="Deel als afbeelding">📸</button>
+        </div>
+      </div>
+
+      <div class="done-screen" id="done-screen">
+        <h2>✦ KLAAR ✦</h2>
+        <div class="done-stats">
+          <span class="done-stat liked"   id="done-likes">♥ 0 geliked</span>
+          <span class="done-stat skipped" id="done-skips">✕ 0 geskipt</span>
+        </div>
+        <div class="done-cats" id="done-cats"></div>
+        <div class="done-suggestie" id="done-suggestie"></div>
+        <button class="btn-restart" onclick="restart()">↺ OPNIEUW</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="api-section">
+    <button class="api-toggle" onclick="toggleApiFields()">⚙ Claude API-sleutel</button>
+    <div class="api-fields" id="api-fields">
+      <label>Plak hier je Anthropic API-sleutel (wordt lokaal opgeslagen):</label>
+      <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="api-save" onclick="slaApiOp()">Opslaan</button>
+        <span class="api-status" id="api-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="log-section">
+    <div class="log-header">
+      <h2>// LOG</h2>
+      <button class="btn-copy" onclick="copyLog()">⎘ KOPIEER LOG</button>
+    </div>
+    <div class="log-box" id="log-box"><span class="log-empty">Nog geen reacties...</span></div>
+  </div>
+
+  <div class="bookmarks-section" id="bookmarks-section">
+    <div class="bookmarks-header">
+      <h2>★ OPGESLAGEN</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="bm-count" id="bm-count"></span>
+        <button class="bm-clear" id="bm-clear" onclick="clearBookmarks()">✕ wis alles</button>
+      </div>
+    </div>
+    <input class="bm-zoek" id="bm-zoek" type="text" placeholder="Zoek in opgeslagen feiten..." oninput="filterBookmarks()" />
+    <div class="bookmark-box" id="bookmarks-box">
+      <span class="bookmarks-leeg">Nog niets opgeslagen...</span>
+    </div>
+  </div>
+
+  <script>
+    const feiten = [
+      // Ruimte & tijd
+      "Een dag op Venus is langer dan een jaar op Venus.",
+      "Als je op het oppervlak van een neutronenster zou staan, zou de zwaartekracht je tot een plat velletje persen in een fractie van een seconde.",
+      "Het licht dat je nu van de zon ziet, verliet de zon 8 minuten geleden — maar het duurde 100.000 jaar om van de kern naar het oppervlak te reizen.",
+      "Er zijn meer sterren in het heelal dan zandkorrels op alle stranden en woestijnen van de aarde.",
+      "De Voyager 1-sonde verliet het zonnestelsel in 2012 en is nu op zo'n 23 miljard kilometer van de aarde.",
+      "Als je de aarde zou verkleinen tot de grootte van een biljardballen, zou ze gladder zijn dan een echte biljartbal.",
+      "Een jaar op Mercurius duurt 88 dagen, maar een dag op Mercurius duurt 59 aardse dagen.",
+      "Het zwaarste bekende object in het heelal is een zwart gat met een massa van 40 miljard zonnen.",
+      "De ISS reist zo snel dat de astronauten elke dag 16 zonsopgangen en -ondergangen zien.",
+      "Als je de atomen in je lichaam tot op hun kern zou samenpersen, past je volledige massa in een ruimte kleiner dan een suikerklontje.",
+
+      // Geschiedenis
+      "Cleopatra leefde dichter bij de uitvinding van de iPhone dan bij de bouw van de piramides.",
+      "Oxford University is ouder dan de Azteken.",
+      "Mammoeten liepen nog rond toen de piramides al gebouwd waren.",
+      "Nintendo bestond al als speelkaartenmaker in 1889.",
+      "De fax is uitgevonden vóór de telefoon.",
+      "De Vikingen gebruikten een soort kompas van kristal — een zonnesteen — om te navigeren in bewolkt weer.",
+      "Er waren ooit kaarsen van mensenolie verkrijgbaar in Parijs. Rendiervet was te duur.",
+      "De oudste bekende recept op aarde is een bierstoofpotje uit Mesopotamië, zo'n 5000 jaar oud.",
+      "De Griekse filosoof Democritus bedacht het concept van het atoom in 400 v.Chr. — hij had gewoon gelijk.",
+      "De Eiffeltoren is in de zomer 15 centimeter groter door warmte-uitzetting van het staal.",
+      "De Titanic was slechts 5 dagen onderweg toen hij zonk.",
+      "Vóór 1880 waren er geen tijdzones — elke stad had zijn eigen lokale tijd.",
+      "De Spartanen gaven hun kinderen van 7 jaar af aan het leger. Ze aten soms leer.",
+      "Napoléon was niet kort — hij was 1,69 m, wat voor die tijd gemiddeld was. De Britse propaganda verzon het.",
+      "Sherlock Holmes zei nooit 'Elementair, mijn beste Watson' in de originele verhalen.",
+
+      // Biologie & natuur
+      "Een octopus heeft drie harten, blauw bloed en negen hersenen.",
+      "Haaien zijn ouder dan bomen.",
+      "Honing bederft nooit — in farao's graven gevonden honing was nog eetbaar.",
+      "Een groep flamingo's heet een 'flamboyance.'",
+      "Schildpadden ademen door hun achterste.",
+      "Koala's hebben geen unieke vingerafdrukken — net als mensen. Zelfs forensische experts kunnen ze niet onderscheiden.",
+      "Eekhoorns zijn verantwoordelijk voor duizenden bomen per jaar omdat ze hun verborgen noten vergeten.",
+      "Een groep kraanvogels heet een 'siege'. Een groep uilen heet een 'parliament'.",
+      "Nijlpaarden produceren een roodachtig zweet dat als zonnebrandcrème én antibioticum werkt.",
+      "Klonterbollen — de zaden van een paardenbloem — zijn 95% lucht.",
+      "Een bij heeft vijf ogen: twee samengestelde en drie enkelvoudige.",
+      "Mieren kunnen tot 50 keer hun eigen gewicht tillen.",
+      "Dolfijnen slapen met één hersenhelft tegelijk, zodat ze bewust kunnen blijven ademen.",
+      "Het hart van een garnaal zit in zijn hoofd.",
+      "Katten piepen niet naar andere katten — alleen naar mensen. Ze leerden het speciaal voor ons.",
+      "Koeien hebben beste vrienden. Ze worden aantoonbaar gestrest als ze van hun vriend gescheiden worden.",
+      "Een vlieg proeft met zijn poten.",
+      "Wombats produceren kubusachtige uitwerpselen — het enige bekende dier dat dat doet.",
+      "Octopussen hebben drie harten: twee pompen bloed naar de kieuwen, één naar de rest van het lichaam. Dat laatste stopt als ze zwemmen — vandaar dat ze liever kruipen.",
+      "Platwormen vechten met hun penis om te bepalen wie de moeder wordt in de voortplanting.",
+      "Paarden kunnen niet overgeven.",
+      "Een groep katten heet een 'clowder'. Een groep jonge katten heet een 'kindle'.",
+      "Slakken kunnen drie jaar slapen.",
+      "Luipaarden zijn sterkere zwemmers dan tijgers.",
+      "Zeekomkommers ademen door hun achterste — net als schildpadden.",
+
+      // Wetenschap & fysica
+      "Water kan tegelijkertijd koken en bevriezen — dit heet het tripelpunt.",
+      "Een lepel lepeltje materiaal van een neutronenster weegt ongeveer 100 miljoen ton.",
+      "Zand van een strand kan niet worden gereproduceerd op menselijke tijdschaal — het duurt miljoenen jaren.",
+      "Als je alle DNA in je lichaam zou uitrekken, reikt het van de aarde naar Pluto en terug — 17 keer.",
+      "Het menselijk brein kan onderscheid maken tussen 1 miljoen verschillende kleuren.",
+      "Licht dat reist door glas is langzamer dan licht in vacuüm — dit is waarom lenzen werken.",
+      "Ieder atoom in je lichaam is miljarden jaren oud. De zware elementen zoals ijzer zijn gevormd in supernovae.",
+      "Warm water kan sneller bevriezen dan koud water onder bepaalde omstandigheden. Dit heet het Mpemba-effect.",
+      "Goud is eetbaar en heeft geen geur of smaak. Het gaat er gewoon doorheen.",
+      "Geluid reist viermaal zo snel door water als door lucht.",
+      "Een menselijke cel bevat zo'n 6 miljard basenparen DNA — genoeg informatie voor duizenden boeken.",
+
+      // Aarde & geografie
+      "Canada heeft meer meren dan alle andere landen bij elkaar.",
+      "Rusland is zo groot dat het negen tijdzones bestrijkt.",
+      "De langste rechte weg ter wereld loopt door Saudi-Arabië: 240 kilometer zonder bocht.",
+      "Mount Everest groeit elk jaar met ongeveer 4 mm door tektonische activiteit.",
+      "De Stille Oceaan is groter dan alle continenten bij elkaar opgeteld.",
+      "Australië is breder dan de maan.",
+      "Er zijn meer mensen woonachtig in Jakarta dan in heel Nederland en België samen.",
+      "De Dode Zee is zo zout dat je er niet in kunt zinken als je gewoon stil blijft liggen.",
+      "Het hoogste punt in Nederland (de Vaalserberg) is lager dan de bodem van veel andere landen.",
+      "Er zijn meer dan 7.000 eilanden in de Filipijnen.",
+
+      // Technologie & uitvindingen
+      "De QR-code is uitgevonden door een Japans bedrijf in 1994 om auto-onderdelen bij te houden.",
+      "Het internet bestond al in een vroege vorm in 1969, maar het World Wide Web pas in 1991.",
+      "De eerste computer bug was een echte insect — een mot in een Harvard-computer in 1947.",
+      "De gemiddelde smartphone heeft meer rekenkracht dan de computers die de Apollo 11-missie bestuurden.",
+      "Het QWERTY-toetsenbord werd ontworpen om te voorkomen dat typemachines verstopten — niet voor snelheid.",
+      "E-mail is ouder dan het internet zoals wij dat kennen.",
+      "De eerste YouTube-video werd geüpload op 23 april 2005 door medeoprichter Jawed Karim in een dierentuin.",
+      "WiFi staat niet voor 'Wireless Fidelity' — de naam betekent niets. Het klinkt gewoon goed.",
+      "De pixelgrootte van de eerste digitale camera (1975) was 0,01 megapixel. Hij woog 3,6 kilo.",
+
+      // Psychologie & hersenen
+      "Je hersenen produceren genoeg elektriciteit om een kleine LED te laten branden.",
+      "De gemiddelde persoon heeft 6.200 gedachten per dag.",
+      "Nostalgie is wetenschappelijk bewezen goed voor je: het verhoogt je gevoel van sociale verbondenheid.",
+      "Mensen zijn de enige dieren die kunnen vervelen — tenminste, dat denken we.",
+      "Je kunt je eigen kietelen niet lachen — je brein voorspelt de beweging en maakt de verrassing onmogelijk.",
+      "De herinnering aan een herinnering verandert elke keer als je eraan denkt.",
+      "Mensen met meer sociale verbindingen leven gemiddeld langer dan mensen die roken.",
+      "Het Dunning-Kruger-effect: mensen met weinig kennis overschatten zichzelf het meest.",
+
+      // Taal & cultuur
+      "Er zijn meer dan 7.000 talen op aarde. Elke twee weken sterft er een uit.",
+      "De langste woord in het Nederlands is 'meervoudigepersoonlijkheidsstoornis' — 37 letters.",
+      "Het woord 'quiz' is waarschijnlijk verzonnen door een Iers theaterdirecteur als grap in 1791.",
+      "'Boondoggle' is een Amerikaans woord voor zinloos werk — het stamt uit de jaren 30.",
+      "In het Japans heb je vier verschillende woorden voor 'ik' afhankelijk van de sociale context.",
+      "De brief 'E' is de meest voorkomende letter in het Nederlands, Engels, Frans en Duits.",
+      "Er bestaat een taal (Piraha) zonder woorden voor getallen groter dan twee.",
+
+      // Eten & drinken
+      "Bananen zijn licht radioactief door hun kaliumgehalte.",
+      "Wasabi dat je bij sushi krijgt in de meeste restaurants buiten Japan is nep — het is mierikswortel met kleurstof.",
+      "Honing is het enige voedsel dat niet bederft. Echt honing.",
+      "Ketchup werd ooit verkocht als medicijn tegen diarree en leverklachten.",
+      "Chocolade was lang alleen beschikbaar als drank. De chocoladereep werd pas in 1847 uitgevonden.",
+      "Een lepel pindakaas bevat genoeg energie om een auto 3 meter vooruit te bewegen.",
+      "Koffie is technisch gezien een vruchtensap — het is geperste koffiebes.",
+      "De sinaasappel is vernoemd naar zijn kleur, niet andersom — in het Arabisch heette hij 'naranj'.",
+      "Tomaten zijn biologisch gezien vruchten, maar de VS Hooggerechtshof verklaarde ze in 1893 tot groente.",
+
+      // Menselijk lichaam
+      "De maag vervangt zijn slijmvlieslaag elke twee weken om te voorkomen dat hij zichzelf verteert.",
+      "Je hart klopt gemiddeld 100.000 keer per dag.",
+      "De neus kan meer dan een biljoen verschillende geuren onderscheiden.",
+      "Menselijk haar groeit gemiddeld 15 centimeter per jaar.",
+      "Je botten zijn vijf keer sterker dan staal van gelijk gewicht.",
+      "De linker en rechter hersenhelft zijn niet zo gescheiden als altijd gedacht — de meeste taken gebruiken beide.",
+      "Mensen zijn de enige zoogdieren die rechtop lopen op twee benen en tegelijk complexe taal gebruiken.",
+      "Spiermassa is dichter dan vet — iemand met meer spieren kan zwaarder zijn maar er slanker uitzien.",
+      "Je lever kan zichzelf regenereren uit slechts 25% van zijn oorspronkelijke massa.",
+      "Elke vierkante centimeter van je huid bevat gemiddeld 600 zweetklieren.",
+
+      // Dieren (meer)
+      "Pinguïns stellen hun partner ten huwelijk met een steen.",
+      "Krokodillen kunnen niet hun tong uitsteken.",
+      "Een groep luiaards heet een 'bed'.",
+      "Zeepaardje-mannetjes dragen de jongen.",
+      "Varkens zijn aantoonbaar intelligenter dan honden.",
+      "Apen zijn sneller met tellen dan mensen.",
+      "Een kwal heeft geen brein, hart of bloed.",
+      "Motten eten geen kleren — hun larven doen dat.",
+      "Haaien zijn ouder dan de Himalaya.",
+      "Een olifant is het enige zoogdier dat niet kan springen.",
+
+      // Curiosa
+      "In Zwitserland is het illegaal om op zondag je gras te maaien.",
+      "Er bestaat een officiële competitie voor het stilzitten. De winnaar zit het langst stil.",
+      "Lego produceert jaarlijks meer banden dan welk bandenbedrijf ook.",
+      "De dot boven de kleine letter 'i' heet een tittle.",
+      "Er zijn meer mogelijke schaakpartijen dan atomen in het waarneembare heelal.",
+      "Het geluid van een klik met je vingers duurt minder dan 7 milliseconden.",
+      "In IJsland zijn er meer schapen dan mensen.",
+      "De kans dat je dood gaat door een neerstortend vliegtuigonderdeel is groter dan de kans door bliksem.",
+      "Er is een woord voor de geur van regen op droge aarde: petrichor.",
+      "Elke dag worden er meer foto's gemaakt dan in de eerste 150 jaar van fotografiegeschiedenis bij elkaar.",
+
+      // Batch 1 — uit jouw lijst
+      "Bijzonder weinig mensen weten dat katten technisch gezien niet kunnen proeven wat zoet is.",
+      "De menselijke tong heeft een unieke afdruk, net als vingerafdrukken.",
+      "Scotland's nationale dier is de eenhoorn.",
+      "Een groep kraaien heet een 'murder.'",
+      "Mensen zijn de enige dieren die blozen.",
+      "Rusland heeft meer oppervlakte dan Pluto.",
+      "Als je alle DNA uit één menselijk lichaam zou uitrollen, is het 2x de breedte van het zonnestelsel.",
+      "Een wombat produceert kubusvortige poep — het enige dier ter wereld.",
+      "Het woord 'quiz' is verzonnen door een Iers theaterimpresario die wedde dat hij een nieuw woord in 24 uur beroemd kon maken.",
+      "De meeste lachbuien in een gesprek komen niet na grappige opmerkingen maar na doodgewone zinnen.",
+      "Een regenworm heeft vijf harten.",
+      "De vingerafdrukken van een koala lijken zo op die van mensen dat ze al eens als bewijsmateriaal zijn verward bij een misdaadonderzoek.",
+      "Alaska is zowel het meest westelijke als meest oostelijke van alle Amerikaanse staten — de Aleoeten steken over de datumgrens.",
+      "In een gemiddeld leven loopt een mens drie keer de aarde rond.",
+      "De kans dat je in je leven door een meteoriet getroffen wordt is groter dan de kans te winnen bij de loterij.",
+      "Er zijn meer mogelijke schaakcombinaties dan atomen in het waarneembare heelal.",
+      "Een 'jiffy' is een echte tijdseenheid: 1/100ste seconde.",
+      "Het woord 'muscle' komt van het Latijnse 'musculus,' wat 'kleine muis' betekent — omdat spieren er onder de huid uitzien als muizen die bewegen.",
+      "Katten brengen hun eigenaren prooien omdat ze denken dat ze incompetente jagers zijn.",
+      "De kortste oorlog in de geschiedenis duurde 38 tot 45 minuten: Engeland vs. Zanzibar in 1896.",
+      "Pinguïns (flamingo's roze kleur) komt van de garnalen en algen die ze eten.",
+      "IJsberen hebben zwarte huid en doorzichtige vacht — de witte kleur is optisch.",
+      "ZeepaardjES zijn de enige dieren waarbij het mannetje bevalt.",
+      "In Finland organiseert men elk jaar een WK Mobiel Dragen, waarbij de prijs het gewicht van de partner in bier is.",
+      "Een 'butt' is een officiële maat: 477 liter — oorspronkelijk voor wijn.",
+      "Het menselijk oog kan het licht van een kaars zien op 48 km afstand in het donker.",
+      "Speelkaarten werden ooit gebruikt als noodvaluta in Canada.",
+      "Krokodillen kunnen hun tong niet uitsteken — die zit vastgeplakt.",
+      "Het duurt 8 minuten en 20 seconden voordat licht van de zon de aarde bereikt.",
+      "Giraffen hebben dezelfde hoeveelheid nekwervels als mensen: zeven.",
+      "Er zijn meer mensen die leven boven de evenaar dan onder.",
+      "In Japan bestaat een 'forest bathing' therapie genaamd Shinrin-yoku.",
+      "Vliegen landen altijd omhoog: ze pakken het plafond beet met hun voorpoten.",
+      "Het menselijk hart klopt in zijn leven gemiddeld 2,5 miljard keer.",
+      "Sloths bewegen zo langzaam dat er algen op hun vacht groeien.",
+      "De naam 'kangaroo' is een misverstand — het is een Australisch Aboriginal antwoord dat 'ik begrijp u niet' betekende.",
+      "Het woord 'robot' komt uit het Tsjechisch en betekent 'slaafse arbeid.'",
+      "Ants herkennen doden door geur — een mier die chemisch naar 'dood' ruikt wordt levend begraven door zijn soortgenoten.",
+      "De gemiddelde persoon eet in zijn leven 35 ton voedsel.",
+      "Er is een dorp in Noorwegen genaamd 'Å.'",
+      "Elke tijger heeft een uniek strepenpatroon, zoals menselijke vingerafdrukken.",
+      "De populairste verjaardag in Nederland? 26 september.",
+      "Sterren flikkeren niet echt — dat is atmosferische turbulentie.",
+      "Een olifant is zwanger 22 maanden.",
+      "Het woord 'nerd' werd voor het eerst gebruikt door Dr. Seuss in 1950.",
+      "Hummingbirds (kolibries) zijn de enige vogels die achteruit kunnen vliegen.",
+      "De ogen van een struisvogel zijn groter dan zijn hersens.",
+      "Paprika's bevatten meer vitamine C dan sinaasappels.",
+      "Meer mensen sterven per jaar door vallende kokosnoten dan door haaien.",
+      "De Stille Oceaan is groter dan alle continenten samen.",
+
+      // Batch 2
+      "Een golf in de Stille Oceaan in 1958 was 524 meter hoog — veroorzaakt door een aardverschuiving.",
+      "Sneeuwvlokken hebben altijd 6 kanten vanwege de moleculaire structuur van water.",
+      "Ieder jaar valt er 30.000 ton ruimtestof op aarde neer.",
+      "Cleopatra sprak negen talen maar was waarschijnlijk geen schoonheid volgens antieke bronnen.",
+      "De menselijke schedel bestaat uit 22 botten.",
+      "Een foetus ontwikkelt vingerafdrukken op 3 maanden.",
+      "Er is geen zwaartekracht in de ruimte — astronauten zijn vrij vallend, niet gewichtloos.",
+      "De meeste mensen staan 's ochtends 1 cm langer dan 's avonds, door compressie van kraakbeen overdag.",
+      "Een papiersnede snijdt zo diep doordat het papier te dun is voor pijnreceptoren om aan te geven waar precies.",
+      "Elke twee uur sterft ergens een taalkundige dialect uit.",
+      "Er zijn meer talen in Papua Nieuw Guinea (800+) dan in heel Europa.",
+      "De kans dat jij en je identieke tweeling exact dezelfde vingerafdruk hebben is nul.",
+      "De mens is het enige dier dat vrijwillig zijn slaap uitstelt.",
+      "Een blind persoon kan visuele dromen hebben als ze niet blind geboren zijn.",
+      "Hondensnuiten zijn uniek als vingerafdrukken.",
+      "Elke 5 jaar vernieuwt je lichaam bijna al je cellen volledig.",
+      "De Mona Lisa heeft geen wenkbrauwen.",
+      "Een gemiddelde persoon loopt in zijn leven het equivalent van twee keer de wereld rond.",
+      "Het menselijk oog maakt 50 kleine bewegingen per seconde die we zelf niet waarnemen — microsaccades.",
+      "Bier was in het oude Egypte meer waard dan geld en werd gebruikt als betaalmiddel voor arbeiders.",
+      "In IJsland is er bijna geen illegale immigratie — maar ook geen muggen.",
+      "De meeste mensen dromen elke nacht maar onthouden meer dan 95% van hun dromen niet.",
+      "Een haai verliest gemiddeld 30.000 tanden in zijn leven.",
+      "Japan heeft meer dan 6.800 eilanden.",
+      "De T-Rex leefde dichter bij ons in de tijd dan bij de Stegosaurus.",
+      "Vliegtuigen zijn ontworpen om te vliegen zonder piloten — ze gebruiken die capaciteit al 95% van de vlucht.",
+      "Elke minuut verwerkt je neus een liter lucht.",
+      "De oudste bekende levende boom is 5.000 jaar oud en staat in Californië — Methuselah.",
+      "Een 'fortnight' (Engels voor twee weken) komt van 'fourteen nights.'",
+      "Bliksem slaat de aarde elke seconde 100 keer.",
+      "De Sahara was 11.000 jaar geleden een groene savanne.",
+      "Soms proef je dingen die je ruikt — reuk en smaak delen hetzelfde zenuwstelsel.",
+      "De helft van al het zuurstof op aarde wordt geproduceerd door oceaanplankton, niet bomen.",
+      "Pinocchio's neus groeide niet als hij een leugen vertelde — dat is alleen in de Disney-versie zo.",
+      "Een menselijk oog weegt 7,5 gram.",
+      "Er zijn meer actieve vulkanen op Jupiter's maan Io dan op de gehele aarde.",
+      "Mensen in de middeleeuwen hadden twee slaapperiodes per nacht, niet één.",
+      "De gedroogde vrucht van de avocado is giftig voor vogels.",
+      "Menselijke botten zijn viermaal sterker dan beton per vierkante inch.",
+      "Katten passen in elke ruimte waar hun hoofd doorheen past door de flexibele kraakbeenborst.",
+      "Zout was ooit zo waardevol dat het gebruikt werd als valuta in Tibet.",
+      "In Japan zijn er cafés waar je katten, uilen, herten, konijnen, otters en zelfs slangen kunt aaien.",
+      "Een aardworm kan zichzelf regenereren — maar niet splitsen in twee levende wormen zoals de mythe zegt.",
+      "Mensen ademen meer door één neusgat tegelijk — en wisselen elke paar uur.",
+      "Dinosaurusveren waren waarschijnlijk felgekleurd, niet bruin-grijs.",
+      "Een papegaai kan 80 jaar oud worden.",
+      "De gemiddelde Nederlander eet 21 kilo kaas per jaar.",
+      "Slechts 2% van de menselijke bevolking heeft groene ogen.",
+      "Er zijn meer dan 40.000 soorten spinnen maar slechts 30 zijn gevaarlijk voor mensen.",
+      "Muizen lachen — maar alleen op frequenties die mensen niet kunnen horen.",
+      "Meer mensen zijn omgekomen door vallend meubilair dan door terrorisme — VS-statistieken.",
+
+      // Batch 3
+      "Een krokodil groeit zijn leven lang door.",
+      "Sloths zijn uitstekende zwemmers maar lopen bijna niet op de grond.",
+      "Mensen kunnen zich maar 3 tot 5 items tegelijk bewust onthouden — werkgeheugen.",
+      "Mensen overdrijven consistent hun geheugen — herinneringen zijn reconstructies, geen foto's.",
+      "Seismologen konden de aardkern ontdekken via weerkaatsende aardbevingsgolven.",
+      "Er zijn meer schaapjes in Nieuw-Zeeland dan mensen — zeven op één.",
+      "Alle pinguïns leven op het zuidelijk halfrond.",
+      "Blinde mensen dromen in andere zintuigelijke ervaringen, niet visueel.",
+      "De menselijke tong heeft smaakpapillen die ook aanwezig zijn in je keel en maag.",
+      "Er zijn meer bacteriën op een schakelaar dan op een toiletbril.",
+      "Mensen die in coma liggen kunnen muziek horen en emotioneel reageren.",
+      "Kwikzilver is een metaal dat vloeibaar is bij kamertemperatuur.",
+      "Elke dag verliest een mens 30.000 tot 40.000 huidcellen.",
+      "Mensen glimlachen gemiddeld 20 keer per dag, maar kinderen 400 keer.",
+      "De gemiddelde hond heeft het intelligentieniveau van een 2-jarig kind.",
+      "Er is een waterval onderwater in de Indische Oceaan bij Mauritius.",
+      "Mensen snurken nooit terwijl ze dromen — REM-slaap blokkeert dit.",
+      "In 2006 werd Pluto gedegradeerd van planeet tot dwergplaneet bij meerderheidstemming.",
+      "Elke molecule zuurstof die je nu inademt was ooit onderdeel van een dinosaurus.",
+      "Kippen zijn de meest voorkomende vogel op aarde — meer dan 23 miljard.",
+      "In het oog zit een 'blinde vlek' die het brein zelf aanvult met verzonnen beeldinfo.",
+      "Mensen die snel praten worden als betrouwbaarder beschouwd dan langzame sprekers.",
+      "Een kameleon verandert van kleur niet als camouflage maar als communicatie.",
+      "Rechters zijn 65% meer geneigd iemand vrij te laten na een korte pauze en lunch.",
+      "Zebrastrepen verwarren insecten — vliegende beesten zien zebra's als één grote massa.",
+      "Het woord 'assassin' stamt uit het Arabisch voor 'hash-eter.'",
+      "Een mens kan overleven op alleen aardappelen en boter — bevat nagenoeg alle voedingsstoffen.",
+      "In de 1800s waren tomaten verdacht als giftig. Mensen wachtten uren na het eten op de dood.",
+      "Een karper kan meer dan 200 jaar oud worden.",
+      "Mensen zijn de enige dieren die bewust de muziekmaat volgen.",
+      "Het woord 'quarantine' komt uit het Italiaans voor '40 dagen' — schepen moesten 40 dagen wachten bij pest.",
+      "Schildpadden kunnen kleuren zien die mensen niet kunnen.",
+      "Er zijn mensen die geen stemmetje in hun hoofd hebben bij het lezen — anendofazisten.",
+      "De maan laat altijd dezelfde kant zien aan de aarde door 'tidal locking.'",
+      "In oudheid was blauw de zeldzaamste kleur in de kunst — blauw pigment was ontzettend duur.",
+      "Het menselijke lichaam geeft genoeg warmte af om 60 watt aan energie te produceren.",
+      "Elke mens is genetisch identiek voor 99,9%.",
+      "Grote apen die in de spiegel kijken herkennen zichzelf — maar kleinere apen niet.",
+      "De snelste mens ooit kan een giraffe niet bijhouden.",
+      "Sommige kikkers kunnen invriezen en ontdooien — ze zijn echt 'bevroren maar niet dood.'",
+      "De meeste interne uurwerken van mensen lopen op 24,2 uur, niet exact 24 uur.",
+      "Shakespeare verzon 1.700 woorden die we nu nog dagelijks gebruiken.",
+      "De gemiddelde levensduur van een Twitter/X-bericht is 18 minuten.",
+      "In China zijn er meer mensen die Engels spreken als tweede taal dan in Amerika totaal.",
+      "Een groep katten heet een 'clowder.'",
+      "De oudste bezette stad ter wereld is Jericho — al 11.000 jaar bewoond.",
+      "Het vroegste bewijs van alcoholgebruik is 10.000 jaar oud — ouder dan de eerste geschreven tekst.",
+      "De eerste e-mail ooit verstuurd was van Ray Tomlinson aan zichzelf in 1971.",
+      "Mensen zijn de enige dieren die een vuur aanmaken voor sociale doeleinden — niet alleen warmte.",
+      "Er zijn meer mensen dood door koe-aanvallen per jaar dan door haai-aanvallen.",
+      "Een zeekomkommer ademt via zijn anus.",
+
+      // Batch 4
+      "Mensen ruiken angst — letterlijk via feromonen.",
+      "Het heelal is 13,8 miljard jaar oud — maar de mensheid bestaat slechts 0,00002% van die tijd.",
+      "Een inktvis heeft het grootste oog van alle dieren — zo groot als een basketbal.",
+      "Mensen zijn geneigd objecten aan te raken in een museum zelfs als het niet mag — we denken met onze handen.",
+      "Het eerste woord ooit gesproken in de ruimte was 'poyekhali' (Russisch voor 'we gaan!') door Gagarin in 1961.",
+      "Abraham Lincoln en John F. Kennedy werden beiden op een vrijdag neergeschoten, in het bijzijn van hun vrouw, in het hoofd.",
+      "Lincoln's secretaris heette Kennedy. Kennedy's secretaris heette Lincoln.",
+      "John Adams en Thomas Jefferson stierven allebei op 4 juli 1826 — precies 50 jaar na de Onafhankelijkheidsverklaring.",
+      "De Titanic had bij haar eerste vaart geen verrekijkers — de sleutel van de kist was per ongeluk meegenomen.",
+      "Napoleon, Hitler en Stalin werden alle drie geboren buiten het land dat ze later domineerden.",
+      "De eerste bom die in WW2 op Berlijn viel, doodde de enige olifant in de Berlijnse dierentuin.",
+      "Charles Darwin en Abraham Lincoln werden op exact dezelfde dag geboren: 12 februari 1809.",
+      "De schrijver Morgan Robertson beschreef in 1898 een schip genaamd 'Titan' dat bij zijn eerste vaart op een ijsberg liep.",
+      "In 1913 woonden Hitler, Stalin, Trotski, Freud en Aartshertog Franz Ferdinand tegelijk in Wenen.",
+      "Winston Churchill werd geboren in een damestoilet op een bal — zijn moeder beviel prematuur tijdens een feest.",
+      "De Griekse filosoof Chrysippus stierf naar verluidt van het lachen — hij gaf zijn ezel wijn en lachte zich dood.",
+      "De aanslag op Franz Ferdinand die WW1 startte mislukte aanvankelijk — Princip kocht toevallig een broodje bij de winkel waar Ferdinand langs reed.",
+      "Twee tweelingbroeders op Bermuda werden een jaar na elkaar aangereden door hetzelfde taxi, dezelfde chauffeur, met dezelfde passagier.",
+      "George Washington's tanden waren niet van hout maar van ivoor, menselijke tanden en lood.",
+      "De Eiffeltoren zou na 20 jaar worden afgebroken — hij werd gered omdat hij nuttig bleek als radiomast.",
+      "Florence Nightingale was een pionier van de statistiek en uitvond de polar area diagram.",
+      "De uitvinder van dynamiet, Alfred Nobel, schrok zo van zijn nagedachtenis dat hij zijn fortuin naliet voor de Nobel-prijzen.",
+      "Het overlijdensbericht noemde hem 'de koopman des doods.'",
+      "Mark Twain werd geboren in 1835 toen de Halley's Komeet langs was en stierf in 1910 — het volgende jaar dat de komeet langskwam. Hij voorspelde dit zelf.",
+      "Het Colosseum in Rome werd gebouwd door tienduizenden Joodse slaven na de val van Jeruzalem in 70 n. Chr. — in slechts 8 tot 10 jaar.",
+      "De Chinese Muur is een aaneenschakeling van muren gebouwd over 2.000 jaar door verschillende dynastieën. Sommige secties sluiten niet op elkaar aan.",
+      "In de Middeleeuwen dronken zelfs kinderen kleine-bier — licht alcoholisch alternatief voor water.",
+      "Koffie was aanvankelijk verboden in Mekka, Engeland en Zweden omdat autoriteiten bang waren voor politieke bijeenkomsten.",
+      "De Vikingen bereikten Noord-Amerika 500 jaar voor Columbus — ze noemden het Vinland.",
+      "De eerste democratie ter wereld was Athene — maar vrouwen, slaven en vreemdelingen hadden geen stemrecht.",
+      "Tsutomu Yamaguchi overleefde de atoombom op Hiroshima en reisde de volgende dag naar Nagasaki — en overleefde die ook.",
+      "Marie Curie's notitieboeken zijn nog steeds radioactief — bezoekers moeten een veiligheidsformulier tekenen.",
+      "De bouwers van Stonehenge vervoerden stenen van 250 km ver zonder wiel.",
+      "Julius Caesar werd precies 23 keer gestoken — slechts één steekwond was dodelijk.",
+      "Isaac Newton was ook alchemist en schreef meer over religie dan over natuurkunde.",
+      "Nikola Tesla was verliefd op een duif.",
+      "De meest succesvolle piraat in de geschiedenis was een Chinese vrouw: Ching Shih, met 1.800 schepen en 80.000 zeelieden.",
+      "Coca-Cola bevatte tot 1903 échte cocaïne — ongeveer 9 mg per glas.",
+      "Vincent van Gogh verkocht in zijn leven slechts één schilderij.",
+      "Columbus stierf in de overtuiging dat hij Azië had bereikt — hij accepteerde nooit dat hij een nieuw continent ontdekt had.",
+      "De pest van de 14e eeuw doodde 30–60% van de Europese bevolking maar leidde paradoxaal tot hogere lonen.",
+      "In WW1 stopte het gevecht op Kerst 1914 spontaan aan het Westelijk Front — soldaten speelden voetbal in niemandsland.",
+      "Een Japanse soldaat, Hiroo Onoda, bleef doorvechten in de jungle tot 1974 — zijn commandant moest hem persoonlijk informeren dat WW2 voorbij was.",
+      "De Berlijnse Muur stond slechts 28 jaar — mensen die bij de bouw waren, waren bij de val nog in leven.",
+      "De eerste foto ooit gemaakt kostte 8 uur belichtingstijd.",
+      "De QWERTY-toetsenbord was ontworpen om typemachines te vertragen, niet te versnellen.",
+      "In Engeland is het illegaal om te sterven in het Parlement — in theorie.",
+      "De oren van een sprinkhaan zitten in zijn buik.",
+      "IJsberen zijn linkspotig.",
+      "Een menselijk haar is sterker per oppervlakte dan staal.",
+      "Het eerste voedsel ooit gegeten op de maan was bacon.",
+
+      // Batch 5
+      "Als je alle lege ruimte uit alle atomen in alle menselijke lichamen zou verwijderen, past de gehele mensheid in een suikerklontje.",
+      "Er zijn meer sterrenstelsels in het waarneembare heelal (2 biljoen) dan seconden verstreken zijn in de hele menselijke beschaving.",
+      "Als je één euro per seconde zou tellen, zou je 31.700 jaar nodig hebben voor 1 biljoen euro.",
+      "Als je alle DNA van alle cellen in één menselijk lichaam aan elkaar zou leggen, gaat de lijn 150 keer heen en terug naar de zon.",
+      "Je hersenen verwerken 11 miljoen bits informatie per seconde — maar je bent je bewust van slechts 50 bits.",
+      "Een foton licht heeft er 170.000 jaar over gedaan vanuit de zonkern het oppervlak te bereiken — daarna slechts 8 minuten naar de aarde.",
+      "De ruimte tussen aarde en maan is zo groot dat alle planeten van ons zonnestelsel er naast elkaar in passen.",
+      "Een theelepel neutronenstermateriaal weegt meer dan 900 keer de Grote Piramide van Giza.",
+      "Na 42 keer vouwen van een vel papier bereik je de afstand aarde–maan. Na 103 vouwen overtreft de dikte het waarneembare heelal.",
+      "De aarde draait om de zon met 107.000 km/u. Het zonnestelsel beweegt door de Melkweg met 828.000 km/u. Je zit nooit stil.",
+      "Diamanten regenen op Neptunus en Uranus — de druk zet koolstof om in diamant, die als oceanen op de kern stapelen.",
+      "De kleur van de zon is wit — vanuit de ruimte. Het geel/oranje dat we zien is atmosferische verstrooiing.",
+      "De zon is zo groot dat 1,3 miljoen aarden erin passen — maar hij is slechts een middelmatige ster.",
+      "Als UY Scuti onze zon was, zou haar oppervlak voorbij de baan van Jupiter reiken.",
+      "De gehele menselijke beschaving past in de laatste 14 seconden van een kosmisch jaar.",
+      "We begrijpen slechts 5% van het heelal — de rest is donkere materie en donkere energie.",
+      "Een zwart gat buigt tijd zelf — bij de rand gaat tijd langzamer. Een klok zou vanuit de verte bevroren lijken.",
+      "Bomen communiceren met elkaar via schimmelnetwerken in de grond — de 'Wood Wide Web.' Ze delen suikers en sturen waarschuwingen.",
+      "Er zijn meer bomen op aarde dan sterren in de Melkweg — maar 46% minder dan voor de mens landbouw begon.",
+      "Kwantumverstrengeling: twee deeltjes reageren instant op elkaar, hoe ver ook van elkaar. Einstein noemde dit 'spookachtige actie op afstand.' Hij had ongelijk.",
+      "In kwantummechanica bestaat een deeltje pas echt als je het meet — daarvoor is het tegelijk op alle mogelijke plaatsen.",
+      "De maan stabiliseert de rotatie van de aarde. Zonder maan zouden de seizoenen chaotisch zijn.",
+      "GPS werkt alleen correct als het rekening houdt met tijdvertraging veroorzaakt door de relativiteitstheorie. Zonder die correctie zou GPS dagelijks 11 km afwijken.",
+      "De aarde heeft een tweede maan — de asteroïde Cruithne in een hoefijzervormige baan.",
+      "Een tardigrade (waterbeer) overleeft in de ruimte zonder bescherming, bij -272°C, bij 150°C, en bij extreme straling.",
+      "De kans dat jij bestaat is astronomisch klein. Eén andere keuze van een voorouder, en jij zou er niet zijn.",
+      "Een straal zonlicht heeft 170.000 jaar nodig om van de kern naar het oppervlak van de zon te reizen.",
+      "Jupiter 'zingt' — zijn magnetisch veld produceert radiogolven die door NASA zijn omgezet naar hoorbaar geluid.",
+      "De snelst roterende pulsar draait 716 keer per seconde om zijn as.",
+      "Elke molecule in je lichaam was ooit sterrestof — jij bent letterlijk gemaakt van stervende sterren.",
+      "Menselijk speeksel bevat een pijnstiller krachtiger dan morfine — opiorfin.",
+      "Een platypus heeft een giftig spoor in de achterpoot — het is een giftig zoogdier.",
+      "Mensen huilen vaker door muziek dan door films — muziek raakt iets primairs.",
+      "In 1983 bijna startte een Sovjet-officier per abuis de nucleaire oorlog — hij besloot te wachten.",
+      "De gemiddelde persoon eet 1 kilo insecten per jaar — onbewust.",
+      "Mensen zijn fysiek de meest efficiënte langeafstandloper op aarde — we overheaten prooi.",
+      "Mieren zijn het enige andere dier dat ook landbouw bedrijft — ze 'verbouwen' schimmels.",
+      "Mensen zijn slechter in multitasking dan ze denken — het is altijd snel wisselen, niet simultaan.",
+      "Dolfijnen geven elkaar namen via klikgeluiden en reageren op hun naam.",
+      "Een kat stoot een purr-geluid uit bij een frequentie die botgenezing bevordert.",
+      "De menselijke huid is het grootste orgaan van het lichaam — gemiddeld 2 m².",
+      "Mensen zijn geprogrammeerd om naar gezichten te zoeken in objecten — dit heet pareidolia.",
+      "De beroemde 'Viking-horned helmet' was nooit echt — dat is 19e-eeuwse mythologie.",
+      "De kleur rood verhoogt de eetlust — dit gebruiken fastfoodketens bewust in hun huisstijl.",
+      "Een menselijk oog kan 10 miljoen verschillende kleuren onderscheiden.",
+      "Er zijn landen die technisch gezien nog in staat van oorlog zijn maar het zijn vergeten.",
+      "Elke hartslag is een gecoördineerde elektrische golf door miljoenen cellen tegelijk.",
+      "Als je alle bloedvaten in één menselijk lichaam aan elkaar zou leggen, omspannen ze 2,5 keer de omtrek van de aarde.",
+      "Er is genoeg goud in de kern van de aarde om de aarde te bedekken met een laag van 4 meter dik.",
+      "De grootste organisme op aarde is een paddenstoelenschimmel in Oregon van 965 hectare.",
+      "Twee derde van de wereld heeft nooit sneeuw gezien.",
+    ];
+
+    // ── Categorieën ────────────────────────────────────
+    const CATEGORIES = {
+      'Ruimte':       { kleur: '#00c8ff', bg: 'rgba(0,200,255,0.1)',   border: 'rgba(0,200,255,0.32)' },
+      'Biologie':     { kleur: '#00e888', bg: 'rgba(0,232,136,0.1)',   border: 'rgba(0,232,136,0.32)' },
+      'Psychologie':  { kleur: '#ff88dd', bg: 'rgba(255,136,221,0.1)', border: 'rgba(255,136,221,0.32)' },
+      'Lichaam':      { kleur: '#ff7755', bg: 'rgba(255,119,85,0.1)',  border: 'rgba(255,119,85,0.32)' },
+      'Aarde':        { kleur: '#44ffaa', bg: 'rgba(68,255,170,0.1)',  border: 'rgba(68,255,170,0.32)' },
+      'Wetenschap':   { kleur: '#bb99ff', bg: 'rgba(187,153,255,0.1)', border: 'rgba(187,153,255,0.32)' },
+      'Technologie':  { kleur: '#ffcc22', bg: 'rgba(255,204,34,0.1)',  border: 'rgba(255,204,34,0.32)' },
+      'Taal':         { kleur: '#ff9944', bg: 'rgba(255,153,68,0.1)',  border: 'rgba(255,153,68,0.32)' },
+      'Eten':         { kleur: '#ffbb55', bg: 'rgba(255,187,85,0.1)',  border: 'rgba(255,187,85,0.32)' },
+      'Geschiedenis': { kleur: '#cc88ff', bg: 'rgba(204,136,255,0.1)', border: 'rgba(204,136,255,0.32)' },
+      'Curiosa':      { kleur: '#88ddff', bg: 'rgba(136,221,255,0.1)', border: 'rgba(136,221,255,0.32)' },
+    };
+
+    function categoriseer(tekst) {
+      const t = tekst.toLowerCase();
+      if (/zon\b|maan\b|heelal|planeet|ster\b|sterren|melkweg|iss\b|voyager|mercurius|venus\b|neptunus|uranus|zwart gat|neutronenster|pulsar|foton|sterrenstelsel|kosmisch|astronomisch|supernova|zonnestelsel|aarde draait|komeet|asteroid|licht reist|licht verliet|licht van de zon|ruimte\b/.test(t)) return 'Ruimte';
+      if (/hersenen|brein\b|geheugen|slaap\b|dromen|psycholog|bewust|gedacht|gevoel|emotie|neuron|zenuw|dunning|kruger|nostalgie|vervelen/.test(t)) return 'Psychologie';
+      if (/menselijk lichaam|bot\b|botten\b|spier|huid\b|hart\b|long\b|lever\b|tand\b|orgaan|slijmvlies|speeksel|zweet|haar groeit|spiermassa|huidcel|bloedvat|schedel|kraakbeen/.test(t)) return 'Lichaam';
+      if (/oceaan|vulkaan|continent|woestijn|sahara|everest|stille oceaan|tijdzon|tektonisch|aardverschuiving|gebergte|klimaat/.test(t)) return 'Aarde';
+      if (/atoom|kwantum|natuur(?:kund)|chemie|molecule|element\b|relativiteit|thermodynamica|isotoop|mpemba|tripelpunt|geluid reist|radioactief|straling/.test(t)) return 'Wetenschap';
+      if (/uitgevonden|uitvinding|technologie|computer|internet|code\b|robot\b|machine|software|hardware|qr-code|wifi|telefoon|fax|youtube|e-mail|email|camera|typ(?:emachine)/.test(t)) return 'Technologie';
+      if (/\btaal\b|\btalen\b|\bwoord\b|\bwoorden\b|\bletter\b|dialect|grammatica|alfabet|piraha|shakespeare.*woord|verzonnen/.test(t)) return 'Taal';
+      if (/eten\b|drinken\b|voedsel|koffie|wijn\b|bier\b|kaas\b|vlees\b|groente|chocolade|honing\b|tomaat|aardappel|banaan|wasabi|ketchup|pindakaas|recept|eetbaar|sinaasappel|fruit\b/.test(t)) return 'Eten';
+      if (/geschied(?:enis|kundig)|historisch|oorlog\b|farao\b|grieks|romein|middeleeuwen|vikingen|piramide|napoleon|hitler|lincoln|columbus|cleopatra|darwin|newton\b|tesla\b|shakespeare|julius caesar|marie curie|ww1|ww2|wereldoorlog|titanic|eiffeltoren|colosseum|berlijnse muur|nobelprijs|alfred nobel/.test(t)) return 'Geschiedenis';
+      if (/haai\b|haaien|octopus|dolfijn|olifant|mier\b|mieren\b|bij\b|bijen\b|spin\b|flamingo|pinguin|krokodil|tijger|leeuw|giraf|nijlpaard|walvis|kreeft|inktvis|zeepaard|zeekomkommer|slak\b|worm\b|luiaard|kameleon|schildpad|vlieg\b|insect|kikker|zeehond|eekhoor|kraanvogel|uil\b|wombat|kwal\b|platwormen|papegaai|struisvogel|tardigrade|zebra|karper|sloth|krokodil|dier\b|dieren\b|vogel\b|vogels\b|vis\b|vissen\b|zoogdier/.test(t)) return 'Biologie';
+      return 'Curiosa';
+    }
+
+    // ── State ──────────────────────────────────────────
+    let volgorde = [], huidigIndex = 0, log = [], busy = false, huidigVraag = null, bookmarks = [];
+    const STORAGE_KEY  = 'feitjeskeizer_v1';
+    const BM_KEY       = 'feitjeskeizer_bookmarks';
+    const FONTSIZE_KEY  = 'feitjeskeizer_fontsize';
+    const FONT_STEPS    = [1.1, 1.3, 1.6, 2.0];   // rem values
+    let fontStep = 2; // default = index 2 → 1.6rem
+    const $ = id => document.getElementById(id);
+    try { bookmarks = JSON.parse(localStorage.getItem(BM_KEY) || '[]'); } catch(_) {}
+    try {
+      const saved = parseInt(localStorage.getItem(FONTSIZE_KEY) ?? '2', 10);
+      if (!isNaN(saved)) fontStep = Math.max(0, Math.min(FONT_STEPS.length - 1, saved));
+    } catch(_) {}
+
+    function setFontSize(delta) {
+      fontStep = Math.max(0, Math.min(FONT_STEPS.length - 1, fontStep + delta));
+      document.documentElement.style.setProperty('--fact-size', FONT_STEPS[fontStep] + 'rem');
+      localStorage.setItem(FONTSIZE_KEY, fontStep);
+    }
+    // Apply saved font size on load
+    document.documentElement.style.setProperty('--fact-size', FONT_STEPS[fontStep] + 'rem');
+
+    // ── Persistence ────────────────────────────────────
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ log, volgorde, huidigIndex }));
+      } catch(e) {}
+    }
+
+    function clearState() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    }
+
+    function loadSavedState() {
+      try {
+        const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (s && Array.isArray(s.volgorde) && s.volgorde.length > 0 &&
+            typeof s.huidigIndex === 'number' && s.huidigIndex >= 0 &&
+            s.huidigIndex <= s.volgorde.length && Array.isArray(s.log)) return s;
+      } catch(e) {}
+      return null;
+    }
+
+    // ── Init ───────────────────────────────────────────
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function init() {
+      const saved = loadSavedState();
+      const banner = $('restore-banner');
+      if (saved && saved.huidigIndex < saved.volgorde.length) {
+        banner.style.display = 'flex';
+        const rem = saved.volgorde.length - saved.huidigIndex;
+        $('restore-text').textContent = `Sessie hersteld · nog ${rem} feitjes te gaan`;
+        $('btn-continue').onclick = () => {
+          banner.style.display = 'none';
+          volgorde = saved.volgorde;
+          huidigIndex = saved.huidigIndex;
+          log = saved.log || [];
+          busy = false;
+          updateCounters();
+          updateProgress();
+          showCardUI();
+          loadFeit();
+          updateLog();
+          animateIn();
+        };
+        $('btn-fresh').onclick = () => {
+          banner.style.display = 'none';
+          clearState();
+          start();
+        };
+      } else {
+        start();
+      }
+    }
+
+    function start() {
+      volgorde = shuffle(feiten.map((_, i) => i));
+      huidigIndex = 0;
+      log = [];
+      busy = false;
+      updateCounters();
+      updateProgress();
+      showCardUI();
+      loadFeit();
+      updateLog();
+      animateIn();
+    }
+
+    function showCardUI() {
+      $('done-screen').style.display = 'none';
+      $('fact-text').style.display = '';
+      $('fact-meta').style.display = '';
+      document.querySelector('.fact-header').style.display = '';
+      $('vraag-wrap').style.display = '';
+      $('quiz-container').className = 'quiz-container';
+      document.querySelector('.buttons').style.display = '';
+      document.querySelector('.hint').style.display = '';
+    }
+
+    function animateIn() {
+      const card = $('card');
+      const wrap = card.parentElement;
+      wrap.classList.remove('breathing');
+      card.style.transform = '';
+      card.classList.remove('fly-right', 'fly-left', 'card-in');
+      void card.offsetWidth;
+      card.classList.add('card-in');
+      setTimeout(() => { wrap.classList.add('breathing'); }, 460);
+    }
+
+    function loadFeit() {
+      const feitTekst = feiten[volgorde[huidigIndex]];
+      if (!feitTekst) return;
+      $('fact-text').innerHTML = linkify(feitTekst);
+      $('fact-number').textContent = `FEIT ${huidigIndex + 1} / ${volgorde.length}`;
+
+      // Jaar-indicator: extraheer eerste 4-cijferig jaar uit de tekst
+      const jaarMatch = feitTekst.match(/\b(1[0-9]{3}|20[0-2][0-9])\b/);
+      const jaarEl = $('jaar-badge');
+      jaarEl.textContent = jaarMatch ? `◈ ${jaarMatch[1]}` : '';
+
+      // Bron-label
+      $('bron-label').textContent = 'Bron: Wikipedia';
+      $('vraag-input').value = '';
+      const ant = $('antwoord');
+      ant.className = 'antwoord';
+      ant.textContent = '';
+      $('btn-vraag').disabled = false;
+      huidigVraag = null;
+      const vv = $('vervolgvragen');
+      vv.className = 'vervolgvragen';
+      vv.innerHTML = '';
+
+      // Quiz reset
+      $('quiz-container').className = 'quiz-container';
+      $('quiz-vraag').innerHTML = '';
+      $('quiz-opties').innerHTML = '';
+      const qtBtn = $('quiz-toggle-btn');
+      qtBtn.disabled = false;
+      qtBtn.textContent = '⚡ QUIZ';
+
+      // Categorie badge + card tint
+      const cat = categoriseer(feitTekst);
+      const c = CATEGORIES[cat] || {};
+      const badge = $('cat-badge');
+      badge.textContent = cat;
+      badge.style.color = c.kleur || '#888';
+      badge.style.background = c.bg || 'rgba(128,128,128,0.1)';
+      badge.style.borderColor = c.border || 'rgba(128,128,128,0.3)';
+
+      // Gradient per categorie
+      const card = $('card');
+      if (c.kleur) {
+        const r = parseInt(c.kleur.slice(1,3), 16);
+        const g = parseInt(c.kleur.slice(3,5), 16);
+        const b = parseInt(c.kleur.slice(5,7), 16);
+        card.style.background = `linear-gradient(148deg,
+          rgba(${Math.min(22+Math.round(r*0.08),50)},${Math.min(6+Math.round(g*0.05),20)},${Math.min(58+Math.round(b*0.09),85)},0.78) 0%,
+          rgba(8,2,24,0.84) 100%)`;
+        card.style.setProperty('--cat-glow', `rgba(${r},${g},${b},0.2)`);
+      } else {
+        card.style.background = '';
+        card.style.setProperty('--cat-glow', 'rgba(153,68,255,0.12)');
+      }
+
+      // Gerelateerde feiten counter
+      const aantalRel = feiten.filter((f, i) => i !== volgorde[huidigIndex] && categoriseer(f) === cat).length;
+      $('rel-counter').textContent = aantalRel > 0 ? `${aantalRel} meer in ${cat}` : '';
+
+      // Bookmark state
+      $('btn-bm').classList.toggle('actief', bookmarks.includes(feitTekst));
+
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const pct = volgorde.length ? (huidigIndex / volgorde.length) * 100 : 0;
+      $('progress-bar').style.width = pct + '%';
+      $('progress-label').textContent = volgorde.length ? `${huidigIndex} / ${volgorde.length}` : '';
+    }
+
+    function updateCounters() {
+      $('cnt-likes').textContent = `♥ ${log.filter(e => e.reactie === 'like').length}`;
+      $('cnt-skips').textContent = `✕ ${log.filter(e => e.reactie === 'dislike').length}`;
+    }
+
+    function bumpCounter(type) {
+      const el = type === 'like' ? $('cnt-likes') : $('cnt-skips');
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
+      setTimeout(() => el.classList.remove('bump'), 220);
+    }
+
+    function setOverlay(type, opacity) {
+      const card = $('card');
+      const o = Math.min(opacity, 1);
+      if (type === 'like') {
+        card.style.borderColor = `rgba(255,0,153,${0.22 + o * 0.78})`;
+        card.style.boxShadow   = `0 2px 4px rgba(0,0,0,0.4), 0 12px 48px rgba(0,0,0,0.55), 0 0 ${Math.round(o * 80)}px rgba(255,0,153,${(o * 0.85).toFixed(2)}), 0 0 ${Math.round(o * 140)}px rgba(255,0,153,${(o * 0.35).toFixed(2)}), inset 0 1px 0 rgba(255,255,255,0.06)`;
+      } else {
+        card.style.borderColor = `rgba(204,68,255,${0.22 + o * 0.78})`;
+        card.style.boxShadow   = `0 2px 4px rgba(0,0,0,0.4), 0 12px 48px rgba(0,0,0,0.55), 0 0 ${Math.round(o * 80)}px rgba(204,68,255,${(o * 0.85).toFixed(2)}), 0 0 ${Math.round(o * 140)}px rgba(204,68,255,${(o * 0.35).toFixed(2)}), inset 0 1px 0 rgba(255,255,255,0.06)`;
+      }
+    }
+
+    function hideOverlays() {
+      const card = $('card');
+      card.style.borderColor = '';
+      card.style.boxShadow   = '';
+    }
+
+    // ── React ──────────────────────────────────────────
+    function react(reactie) {
+      if (busy || huidigIndex >= volgorde.length) return;
+      busy = true;
+
+      if (navigator.vibrate) navigator.vibrate(25);
+      log.push({ feit: feiten[volgorde[huidigIndex]], reactie, cat: categoriseer(feiten[volgorde[huidigIndex]]), vraag: huidigVraag });
+      updateLog();
+      updateCounters();
+      bumpCounter(reactie);
+
+      // Milestone particles
+      if (reactie === 'like') {
+        const likeN = log.filter(e => e.reactie === 'like').length;
+        if ([10, 25, 50, 100].includes(likeN)) {
+          const r = $('cnt-likes').getBoundingClientRect();
+          spawnParticles('♥', 22, r.left + r.width / 2, r.top + r.height / 2);
+          if (navigator.vibrate) navigator.vibrate([40, 20, 40, 20, 80]);
+        }
+      }
+      setOverlay(reactie, 1);
+      saveState();
+
+      const card = $('card');
+      const wrap = card.parentElement;
+      wrap.classList.remove('breathing');
+      wrap.classList.add('stack-advance');
+      card.style.transition = '';
+      card.style.transform = '';
+      card.classList.add(reactie === 'like' ? 'fly-right' : 'fly-left');
+
+      setTimeout(() => {
+        huidigIndex++;
+        wrap.classList.remove('stack-advance');
+        card.classList.remove('fly-right', 'fly-left');
+        card.style.transform = '';
+        hideOverlays();
+        if (huidigIndex >= volgorde.length) { clearState(); showDone(); busy = false; return; }
+        loadFeit();
+        card.classList.remove('card-in');
+        void card.offsetWidth;
+        card.classList.add('card-in');
+        busy = false;
+      }, 380);
+    }
+
+    function showDone() {
+      const likes = log.filter(e => e.reactie === 'like').length;
+      const skips = log.filter(e => e.reactie === 'dislike').length;
+      $('done-likes').textContent = `♥ ${likes} geliked`;
+      $('done-skips').textContent = `✕ ${skips} geskipt`;
+
+      // Categorie-verdeling van likes
+      const telling = {};
+      log.filter(e => e.reactie === 'like').forEach(e => {
+        const cat = e.cat || categoriseer(e.feit);
+        telling[cat] = (telling[cat] || 0) + 1;
+      });
+      const gesorteerd = Object.entries(telling).sort((a, b) => b[1] - a[1]).slice(0, 4);
+      const max = gesorteerd[0]?.[1] || 1;
+
+      $('done-cats').innerHTML = gesorteerd.map(([cat, n]) => {
+        const c = CATEGORIES[cat] || { kleur: '#888', bg: 'rgba(128,128,128,0.1)', border: 'rgba(128,128,128,0.3)' };
+        return `<div class="done-cat-item">
+          <span class="done-cat-label" style="color:${c.kleur}">${cat}</span>
+          <div class="done-cat-bar-wrap">
+            <div class="done-cat-bar" style="width:0;background:${c.kleur}" data-w="${Math.round((n/max)*100)}"></div>
+          </div>
+          <span class="done-cat-count">${n}</span>
+        </div>`;
+      }).join('');
+
+      // Animeer bars na render
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.querySelectorAll('.done-cat-bar').forEach(bar => {
+          bar.style.width = bar.dataset.w + '%';
+        });
+      }));
+
+      // Personalisatie-suggestie
+      const top = gesorteerd.slice(0, 2).map(([c]) => c);
+      $('done-suggestie').textContent = top.length
+        ? `Je houdt van ${top.join(' & ')} → vraag AI om nieuwe feitjes die hier dieper op ingaan.`
+        : '';
+      $('fact-text').style.display = 'none';
+      $('fact-meta').style.display = 'none';
+      document.querySelector('.fact-header').style.display = 'none';
+      $('vraag-wrap').style.display = 'none';
+      $('quiz-container').className = 'quiz-container';
+      document.querySelector('.buttons').style.display = 'none';
+      document.querySelector('.hint').style.display = 'none';
+      $('done-screen').style.display = 'flex';
+      $('progress-bar').style.width = '100%';
+    }
+
+    function restart() {
+      clearState();
+      log = [];
+      start();
+    }
+
+    // ── Keyboard ───────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (document.activeElement.tagName === 'INPUT') return;
+      if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') react('like');
+      if (e.key === 'ArrowLeft'  || e.key === 'h' || e.key === 'H') react('dislike');
+      if (e.key === 'z' || e.key === 'Z') undo();
+      if (e.key === 'b' || e.key === 'B') toggleBookmark();
+    });
+
+    // ── Drag-to-swipe (pointer events) ─────────────────
+    const cardEl = $('card');
+    let dragStartX = 0, dragStartY = 0, dragCurX = 0, isDragging = false;
+    const SWIPE_THRESH = 90;
+
+    cardEl.addEventListener('pointerdown', e => {
+      if (busy || e.target.closest('button') || e.target.closest('.wiki-chip')) return;
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragCurX = 0;
+      cardEl.setPointerCapture(e.pointerId);
+      cardEl.style.transition = 'none';
+      cardEl.parentElement.classList.remove('breathing');
+    });
+
+    cardEl.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      // Ignore if primarily vertical
+      if (Math.abs(dx) < 8 && Math.abs(dy) > Math.abs(dx)) return;
+      dragCurX = dx;
+      const rot   = dx / 16;
+      const lift  = Math.min(Math.abs(dx) * 0.05, 14);
+      const tx    = dx * 0.38;
+      cardEl.style.transform = `translateX(${tx}px) rotate(${rot}deg) translateY(-${lift}px)`;
+
+      const ratio = Math.max(0, (Math.abs(dx) - 18) / (SWIPE_THRESH - 18));
+      if (dx > 18)       { setOverlay('like',    Math.min(ratio, 1)); }
+      else if (dx < -18) { setOverlay('dislike',  Math.min(ratio, 1)); }
+      else               { hideOverlays(); }
+    });
+
+    cardEl.addEventListener('pointerup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      cardEl.style.transition = '';
+      hideOverlays();
+      if      (dragCurX >  SWIPE_THRESH) { react('like'); }
+      else if (dragCurX < -SWIPE_THRESH) { react('dislike'); }
+      else {
+        cardEl.style.transition = 'transform 0.42s cubic-bezier(.34,1.56,.64,1)';
+        cardEl.style.transform = '';
+        setTimeout(() => {
+          cardEl.style.transition = '';
+          cardEl.parentElement.classList.add('breathing');
+        }, 450);
+      }
+    });
+
+    cardEl.addEventListener('pointercancel', () => {
+      isDragging = false;
+      cardEl.style.transition = 'transform 0.3s ease';
+      cardEl.style.transform = '';
+      hideOverlays();
+      setTimeout(() => { cardEl.style.transition = ''; }, 320);
+    });
+
+    // ── Mouse tilt + shine parallax (hover, no drag) ───
+    const shineEl = cardEl.querySelector('.card-shine');
+    cardEl.addEventListener('mousemove', e => {
+      if (busy || isDragging) return;
+      const r = cardEl.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      cardEl.style.transform = `perspective(900px) rotateY(${x * 6}deg) rotateX(${-y * 4}deg)`;
+      const px = Math.round((x+0.5)*100), py = Math.round((y+0.5)*100);
+      const hueAngle = Math.round((x+0.5) * 200);
+      shineEl.style.background = [
+        `radial-gradient(circle at ${px}% ${py}%, rgba(255,255,255,0.16) 0%, transparent 48%)`,
+        `linear-gradient(${hueAngle}deg, rgba(255,0,153,0.05), rgba(0,200,255,0.06), rgba(0,232,136,0.04), rgba(255,204,34,0.05), rgba(153,68,255,0.06))`,
+      ].join(', ');
+    });
+
+    cardEl.addEventListener('mouseleave', () => {
+      if (isDragging) return;
+      cardEl.style.transition = 'transform 0.45s cubic-bezier(.34,1.56,.64,1)';
+      cardEl.style.transform = '';
+      shineEl.style.background = '';
+      setTimeout(() => { cardEl.style.transition = ''; }, 460);
+    });
+
+    // ── API-sleutel beheer ──────────────────────────────
+    function getApiKey() { return localStorage.getItem('anthropic_api_key') || ''; }
+
+    function slaApiOp() {
+      const key = $('api-key-input').value.trim();
+      if (key) {
+        localStorage.setItem('anthropic_api_key', key);
+        $('api-status').textContent = '✓ Opgeslagen';
+      } else {
+        localStorage.removeItem('anthropic_api_key');
+        $('api-status').textContent = 'Verwijderd';
+      }
+      setTimeout(() => { $('api-status').textContent = ''; }, 2500);
+    }
+
+    function toggleApiFields() {
+      const f = $('api-fields');
+      f.classList.toggle('open');
+      if (f.classList.contains('open')) $('api-key-input').value = getApiKey();
+    }
+
+    // ── Vraag beantwoorden ──────────────────────────────
+    async function vraagStellen() {
+      const input = $('vraag-input');
+      const btn   = $('btn-vraag');
+      const ant   = $('antwoord');
+      const vraag = input.value.trim();
+      if (!vraag) return;
+
+      const feitTekst = feiten[volgorde[huidigIndex]];
+      btn.disabled = true;
+      const apiKey = getApiKey();
+
+      if (apiKey) {
+        ant.className = 'antwoord laden';
+        ant.textContent = 'Claude denkt na...';
+        try {
+          const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 300,
+              messages: [{ role: 'user', content:
+                `Feit: "${feitTekst}"\n\nVraag: ${vraag}\n\nAntwoord uitsluitend als JSON, geen andere tekst:\n{"a":"antwoord max 3 zinnen","v":["vervolgvraag1?","vervolgvraag2?","vervolgvraag3?"],"bron":"https://nl.wikipedia.org/wiki/Relevante_Pagina_of_lege_string"}`
+              }]
+            })
+          });
+          if (!res.ok) throw new Error(`API fout ${res.status}`);
+          const data = await res.json();
+          let tekst = data.content[0].text.trim();
+          const match = tekst.match(/\{[\s\S]*\}/);
+          if (match) tekst = match[0];
+          let parsed;
+          try { parsed = JSON.parse(tekst); } catch(_) { parsed = { a: tekst, v: [] }; }
+
+          ant.className = 'antwoord zichtbaar';
+          ant.innerHTML = '';
+          const antTekst = document.createTextNode(parsed.a || tekst);
+          ant.appendChild(antTekst);
+          if (parsed.bron && parsed.bron.startsWith('http')) {
+            const bronLink = document.createElement('a');
+            bronLink.className = 'antwoord-bron';
+            bronLink.href = parsed.bron;
+            bronLink.target = '_blank';
+            bronLink.rel = 'noopener';
+            bronLink.textContent = '→ Lees meer op Wikipedia';
+            ant.appendChild(bronLink);
+          }
+          huidigVraag = vraag;
+
+          // Vervolgvragen chips
+          const vv = $('vervolgvragen');
+          vv.innerHTML = '';
+          (parsed.v || []).slice(0, 3).forEach(q => {
+            const btn = document.createElement('button');
+            btn.className = 'vv-chip';
+            btn.textContent = q;
+            btn.onclick = () => { $('vraag-input').value = q; vraagStellen(); };
+            vv.appendChild(btn);
+          });
+          vv.className = 'vervolgvragen' + ((parsed.v || []).length ? ' zichtbaar' : '');
+        } catch (err) {
+          ant.className = 'antwoord fout';
+          ant.textContent = `Claude-fout: ${err.message}`;
+        }
+      } else {
+        // Wikipedia fallback
+        ant.className = 'antwoord laden';
+        ant.textContent = 'Zoeken op Wikipedia...';
+        try {
+          const geciteerd = feitTekst.match(/['"'"]([^'"'"]+)['"'"]/);
+          const eigenNaam = feitTekst.match(/(?:^|\s)([A-Z][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüý]{2,})/g);
+          const onderwerp = geciteerd ? geciteerd[1]
+            : eigenNaam?.length ? eigenNaam[0].trim()
+            : feitTekst.split(/\s+/).slice(0, 2).join(' ');
+
+          let extract = await zoekWiki('nl', onderwerp) || await zoekWiki('en', onderwerp)
+                     || await zoekWiki('nl', vraag) || await zoekWiki('en', vraag);
+          if (!extract) throw new Error('niets gevonden');
+
+          const zinnen = extract.match(/[^.!?\n]{15,}[.!?]/g) || [];
+          const woorden = [...vraag.toLowerCase().split(/\s+/), ...feitTekst.toLowerCase().split(/\s+/)]
+            .filter(w => w.length > 4);
+          const top = zinnen
+            .map(z => ({ z: z.trim(), s: woorden.filter(w => z.toLowerCase().includes(w)).length }))
+            .sort((a, b) => b.s - a.s).slice(0, 3).map(x => x.z).join(' ').trim();
+
+          ant.className = 'antwoord zichtbaar';
+          ant.textContent = (top || zinnen.slice(0, 3).join(' ').trim() || extract.slice(0, 300))
+            + '\n\n💡 Voeg een Claude API-sleutel toe onderaan voor betere antwoorden.';
+        } catch (_) {
+          ant.className = 'antwoord fout';
+          ant.textContent = 'Geen resultaat gevonden. Voeg onderaan een Claude API-sleutel toe voor directe antwoorden.';
+        }
+      }
+
+      btn.disabled = false;
+    }
+
+    async function zoekWiki(lang, zoekterm) {
+      const base = `https://${lang}.wikipedia.org`;
+      const searchUrl = `${base}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(zoekterm)}&utf8=&format=json&origin=*&srlimit=1`;
+      const s = await fetch(searchUrl).then(r => r.json());
+      const resultaat = s.query?.search?.[0];
+      if (!resultaat) return null;
+
+      // Haal volledige tekst op (niet alleen intro-paragraaf)
+      const titel = encodeURIComponent(resultaat.title);
+      const extractUrl = `${base}/w/api.php?action=query&prop=extracts&exsentences=30&explaintext=1&titles=${titel}&format=json&origin=*`;
+      const e = await fetch(extractUrl).then(r => r.json());
+      const pages = e.query?.pages || {};
+      const pageId = Object.keys(pages)[0];
+      const page = pageId ? pages[pageId] : null;
+      return page?.extract || null;
+    }
+
+    // ── Linkify: wrap proper nouns in wiki-chips ──────────
+    function linkify(tekst) {
+      // Match capitalized words (likely proper nouns) of 4+ chars, not at start of sentence
+      return tekst.replace(/(?<=[^.!?\n]\s)([A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüý]{3,}(?:\s[A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ][a-zàáâãäåæçèéêëìíîïðñòóôõöøùúûüý]{2,})*)/g,
+        (_, m) => `<span class="wiki-chip" data-term="${m}">${m}</span>`
+      );
+    }
+
+    // ── Wiki tooltip ──────────────────────────────────────
+    let wikiTooltipTimeout = null;
+    async function toonWikiTooltip(term, el) {
+      const tooltip = $('wiki-tooltip');
+      clearTimeout(wikiTooltipTimeout);
+      // Position near element
+      const rect = el.getBoundingClientRect();
+      tooltip.style.display = 'block';
+      tooltip.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
+      tooltip.style.top  = (rect.bottom + 8) + 'px';
+      $('wiki-tooltip-title').textContent = term;
+      $('wiki-tooltip-text').textContent  = '…';
+      $('wiki-tooltip-link').textContent  = '';
+      $('wiki-tooltip-link').href = '';
+      try {
+        const base = 'https://nl.wikipedia.org';
+        const searchUrl = `${base}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term)}&utf8=&format=json&origin=*&srlimit=1`;
+        const s = await fetch(searchUrl).then(r => r.json());
+        const resultaat = s.query?.search?.[0];
+        if (!resultaat) { tooltip.style.display = 'none'; return; }
+        const titel = encodeURIComponent(resultaat.title);
+        const extractUrl = `${base}/w/api.php?action=query&prop=extracts&exsentences=2&explaintext=1&titles=${titel}&format=json&origin=*`;
+        const e = await fetch(extractUrl).then(r => r.json());
+        const pages = e.query?.pages;
+        const page  = pages?.[Object.keys(pages)[0]];
+        const extract = page?.extract?.replace(/\n.*/s, '') || '';
+        if (!extract) { tooltip.style.display = 'none'; return; }
+        $('wiki-tooltip-text').textContent  = extract.slice(0, 180) + (extract.length > 180 ? '…' : '');
+        const wikiLink = `${base}/wiki/${titel}`;
+        $('wiki-tooltip-link').textContent  = '→ Wikipedia';
+        $('wiki-tooltip-link').href = wikiLink;
+      } catch(_) { tooltip.style.display = 'none'; }
+    }
+
+    // Hide tooltip when clicking elsewhere
+    document.addEventListener('click', e => {
+      if (!e.target.classList.contains('wiki-chip')) {
+        $('wiki-tooltip').style.display = 'none';
+      }
+    });
+
+    // Delegation: click on wiki-chip in fact-text
+    $('fact-text').addEventListener('click', e => {
+      const chip = e.target.closest('.wiki-chip');
+      if (!chip) return;
+      e.stopPropagation();
+      toonWikiTooltip(chip.dataset.term, chip);
+    });
+
+    // Druk Enter in het veld
+    $('vraag-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); vraagStellen(); }
+    });
+    $('btn-vraag').addEventListener('click', vraagStellen);
+
+    // Voorkom dat klikken in het invoerveld de swipe activeert
+    $('vraag-wrap').addEventListener('pointerdown', e => e.stopPropagation());
+
+    // ── Log ────────────────────────────────────────────
+    function updateLog() {
+      const box = $('log-box');
+      if (log.length === 0) {
+        box.innerHTML = '<span class="log-empty">Nog geen reacties...</span>';
+        return;
+      }
+      box.innerHTML = log.map(e => {
+        const c = CATEGORIES[e.cat] || {};
+        const kleur = c.kleur || '#888';
+        const icon = e.reactie === 'like'
+          ? `<span style="color:#ff0099">♥ LIKE  </span>`
+          : `<span style="color:#cc44ff">✕ SKIP  </span>`;
+        const catSpan = e.cat
+          ? `<span style="color:${kleur};opacity:0.65;font-size:0.85em"> [${e.cat}]</span>`
+          : '';
+        const vraagRegel = e.vraag
+          ? `\n  <span style="color:rgba(204,68,255,0.6)">✦ ${e.vraag}</span>`
+          : '';
+        return `<span>${icon}${e.feit}${catSpan}${vraagRegel}</span>`;
+      }).join('\n');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function copyLog() {
+      if (log.length === 0) return;
+      const tekst =
+        "=== FEITJESKEIZER LOG ===\n\n" +
+        "GELIKED:\n" +
+        log.filter(e => e.reactie === 'like').map(e => `- ${e.feit}`).join('\n') +
+        "\n\nGESKIPT:\n" +
+        log.filter(e => e.reactie === 'dislike').map(e => `- ${e.feit}`).join('\n') +
+        "\n\n=== Maak een nieuwe set feitjes die aansluit op mijn voorkeuren ===";
+      navigator.clipboard.writeText(tekst).then(() => {
+        const btn = document.querySelector('.btn-copy');
+        const orig = btn.textContent;
+        btn.textContent = '✓ GEKOPIEERD!';
+        setTimeout(() => btn.textContent = orig, 2000);
+      });
+    }
+
+    // ── Undo ──────────────────────────────────────────
+    function undo() {
+      if (busy || log.length === 0 || huidigIndex === 0) return;
+      const entry = log.pop();
+      huidigIndex--;
+      updateCounters();
+      updateLog();
+      saveState();
+      huidigVraag = null;
+      loadFeit();
+      const card = $('card');
+      const fromX = entry.reactie === 'like' ? 130 : -130;
+      card.classList.remove('fly-right', 'fly-left', 'card-in');
+      card.style.transition = 'none';
+      card.style.transform = `translateX(${fromX}%) rotate(${fromX > 0 ? 16 : -16}deg)`;
+      void card.offsetWidth;
+      card.style.transition = 'transform 0.38s cubic-bezier(.34,1.2,.64,1)';
+      card.style.transform = '';
+      setTimeout(() => { card.style.transition = ''; }, 400);
+    }
+
+    // ── Bookmarks ─────────────────────────────────────
+    function toggleBookmark() {
+      if (huidigIndex >= volgorde.length) return;
+      const feit = feiten[volgorde[huidigIndex]];
+      const btn  = $('btn-bm');
+      const idx  = bookmarks.indexOf(feit);
+      if (idx === -1) {
+        bookmarks.push(feit);
+        btn.classList.add('actief');
+        if (navigator.vibrate) navigator.vibrate(15);
+      } else {
+        bookmarks.splice(idx, 1);
+        btn.classList.remove('actief');
+      }
+      try { localStorage.setItem(BM_KEY, JSON.stringify(bookmarks)); } catch(_) {}
+      updateBookmarks();
+    }
+
+    function updateBookmarks() {
+      const box  = $('bookmarks-box');
+      const zoek = $('bm-zoek');
+      const teller = $('bm-count');
+      const clearBtn = $('bm-clear');
+      if (bookmarks.length === 0) {
+        box.innerHTML = '<span class="bookmarks-leeg">Nog niets opgeslagen...</span>';
+        zoek.style.display = 'none';
+        teller.textContent = '';
+        clearBtn.style.display = 'none';
+        return;
+      }
+      zoek.style.display = '';
+      clearBtn.style.display = '';
+      teller.textContent = `${bookmarks.length}`;
+      const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      box.innerHTML = bookmarks.map((f, i) =>
+        `<div class="bookmark-item" data-idx="${i}">${esc(f)}</div>`
+      ).join('');
+      filterBookmarks();
+    }
+
+    function filterBookmarks() {
+      const q = ($('bm-zoek').value || '').toLowerCase();
+      document.querySelectorAll('#bookmarks-box .bookmark-item').forEach(el => {
+        el.classList.toggle('verborgen', q.length > 0 && !el.textContent.toLowerCase().includes(q));
+      });
+    }
+
+    function clearBookmarks() {
+      if (!confirm('Alle opgeslagen feiten verwijderen?')) return;
+      bookmarks = [];
+      try { localStorage.removeItem(BM_KEY); } catch(_) {}
+      updateBookmarks();
+      if (huidigIndex < volgorde.length) {
+        $('btn-bm').classList.remove('actief');
+      }
+    }
+
+    // ── Particles ─────────────────────────────────────
+    function spawnParticles(emoji, count, x, y) {
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const el = document.createElement('span');
+          el.className = 'particle';
+          el.textContent = emoji;
+          el.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
+          el.style.top  = y + 'px';
+          el.style.fontSize = (0.9 + Math.random() * 0.8) + 'rem';
+          el.style.animationDuration = (0.85 + Math.random() * 0.55) + 's';
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), 1600);
+        }, i * 38);
+      }
+    }
+
+    // ── Quiz ──────────────────────────────────────────
+    async function triggerQuiz() {
+      const apiKey = getApiKey();
+      const btn = $('quiz-toggle-btn');
+      if (!apiKey) {
+        const orig = btn.textContent;
+        btn.textContent = '⚡ Vereist API-sleutel';
+        setTimeout(() => { btn.textContent = orig; }, 2500);
+        return;
+      }
+      btn.disabled = true;
+      $('quiz-container').className = 'quiz-container open';
+      $('quiz-vraag').innerHTML = '<span class="quiz-laden">Quiz genereren...</span>';
+      $('quiz-opties').innerHTML = '';
+      const feitTekst = feiten[volgorde[huidigIndex]];
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 260,
+            messages: [{ role: 'user', content:
+              `Feit: "${feitTekst}"\n\nMaak een quizvraag. Antwoord uitsluitend als JSON:\n{"v":"vraag?","o":["juist antwoord","fout1","fout2","fout3"],"c":0}`
+            }]
+          })
+        });
+        if (!res.ok) throw new Error('API fout');
+        const data = await res.json();
+        let tekst = data.content[0].text.trim();
+        const m = tekst.match(/\{[\s\S]*\}/);
+        if (m) tekst = m[0];
+        let parsed;
+        try { parsed = JSON.parse(tekst); } catch(_) {
+          $('quiz-vraag').innerHTML = `<span style="color:rgba(255,110,110,0.8)">Quiz-gegevens ongeldig, probeer opnieuw</span>`;
+          btn.disabled = false;
+          return;
+        }
+        $('quiz-vraag').textContent = parsed.v;
+        const shuffled = (parsed.o || [])
+          .map((o, i) => ({ o, juist: i === (parsed.c ?? 0) }))
+          .sort(() => Math.random() - 0.5);
+        const optiesEl = $('quiz-opties');
+        shuffled.forEach(({ o, juist }) => {
+          const b = document.createElement('button');
+          b.className = 'quiz-optie';
+          b.textContent = o;
+          b.onclick = () => {
+            optiesEl.querySelectorAll('.quiz-optie').forEach(x => {
+              x.disabled = true;
+              if (x === b) x.classList.add(juist ? 'correct' : 'fout');
+              else if (shuffled.find(s => s.juist)?.o === x.textContent) x.classList.add('correct');
+            });
+            if (juist && navigator.vibrate) navigator.vibrate(60);
+          };
+          optiesEl.appendChild(b);
+        });
+      } catch (err) {
+        $('quiz-vraag').innerHTML = `<span style="color:rgba(255,110,110,0.8);font-size:0.85rem">Fout: ${err.message}</span>`;
+      }
+      btn.disabled = false;
+    }
+
+    // ── Export als afbeelding ─────────────────────────
+    function rrect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.lineTo(x+w-r, y); ctx.arcTo(x+w, y, x+w, y+r, r);
+      ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
+      ctx.lineTo(x+r, y+h); ctx.arcTo(x, y+h, x, y+h-r, r);
+      ctx.lineTo(x, y+r); ctx.arcTo(x, y, x+r, y, r);
+      ctx.closePath();
+    }
+
+    function wrapText(ctx, tekst, maxW) {
+      const words = tekst.split(' ');
+      const lines = [];
+      let line = '';
+      for (const w of words) {
+        const test = line ? line + ' ' + w : w;
+        if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+        else line = test;
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    async function exportKaart() {
+      if (huidigIndex >= volgorde.length) return;
+      await document.fonts.ready;
+      const W = 540, H = 370, S = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = W * S; canvas.height = H * S;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(S, S);
+
+      // Achtergrond
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0, '#16063a'); bg.addColorStop(1, '#080218');
+      rrect(ctx, 0, 0, W, H, 20); ctx.fillStyle = bg; ctx.fill();
+
+      // Border
+      rrect(ctx, 0.5, 0.5, W-1, H-1, 20);
+      ctx.strokeStyle = 'rgba(204,68,255,0.4)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      const feitTekst = feiten[volgorde[huidigIndex]];
+      const cat = categoriseer(feitTekst);
+      const c = CATEGORIES[cat] || {};
+
+      // Feit-nummer
+      ctx.font = 'bold 12px "VT323", monospace';
+      ctx.fillStyle = 'rgba(204,68,255,0.55)';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`FEIT ${huidigIndex + 1} / ${volgorde.length}`, 26, 24);
+
+      // Categorie badge
+      ctx.font = 'bold 10px Rajdhani, system-ui, sans-serif';
+      const catLabel = cat.toUpperCase();
+      const catW = ctx.measureText(catLabel).width + 18;
+      const bx = W - 26 - catW, by = 18;
+      rrect(ctx, bx, by, catW, 22, 11);
+      ctx.fillStyle = c.bg || 'rgba(128,128,128,0.15)'; ctx.fill();
+      rrect(ctx, bx, by, catW, 22, 11);
+      ctx.strokeStyle = c.border || 'rgba(128,128,128,0.3)'; ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.fillStyle = c.kleur || '#888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(catLabel, bx + 9, by + 11);
+
+      // Feit-tekst
+      const fs = feitTekst.length > 130 ? 17 : feitTekst.length > 80 ? 20 : 23;
+      ctx.font = `600 ${fs}px Rajdhani, system-ui, sans-serif`;
+      ctx.fillStyle = 'rgba(255,255,255,0.93)';
+      ctx.textBaseline = 'top';
+      const regels = wrapText(ctx, feitTekst, W - 52);
+      let y = 64;
+      for (const r of regels) { ctx.fillText(r, 26, y); y += fs * 1.58; }
+
+      // Branding
+      ctx.font = '700 11px Rajdhani, system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(204,68,255,0.38)';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('✦ FEITJESKEIZER', 26, H - 18);
+
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `feit-${huidigIndex + 1}.png`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      });
+    }
+
+    updateBookmarks();
+
+    // ── Dagelijks feit ─────────────────────────────────
+    function dagelijksFeit() {
+      const nu  = new Date();
+      const dag = Math.floor(Date.UTC(nu.getUTCFullYear(), nu.getUTCMonth(), nu.getUTCDate()) / 86400000); // UTC epochdag
+      const idx  = dag % feiten.length;
+      const tekst = feiten[idx];
+      $('dagelijks-tekst').textContent = tekst;
+      const cat = categoriseer(tekst);
+      const catEl = $('dagelijks-cat');
+      catEl.textContent = cat;
+      const c = CATEGORIES[cat] || {};
+      if (c.kleur) {
+        catEl.style.color = c.kleur;
+        catEl.style.borderColor = c.border;
+        catEl.style.background  = c.bg;
+      }
+    }
+    dagelijksFeit();
+
+    // ── Service Worker (PWA) ────────────────────────────
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    init();
+  </script>
+  <div class="wiki-tooltip" id="wiki-tooltip">
+    <div class="wiki-tooltip-title" id="wiki-tooltip-title"></div>
+    <div id="wiki-tooltip-text"></div>
+    <a class="wiki-tooltip-link" id="wiki-tooltip-link" target="_blank" rel="noopener"></a>
+  </div>
+</body>
+</html>
